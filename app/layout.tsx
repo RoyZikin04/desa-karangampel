@@ -9,9 +9,8 @@ import VisitorTracker from "@/components/visitor-tracker"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Desa Makmur - Portal UMKM dan Informasi Desa",
-  description: "Website resmi Desa Makmur yang menyediakan informasi lengkap tentang desa dan promosi UMKM lokal",
-    generator: 'v0.dev'
+  title: "Desa Karangampel - Portal UMKM dan Informasi Desa",
+  description: "Website Desa Karangampel yang menyediakan informasi lengkap tentang desa dan promosi UMKM lokal",
 }
 
 export default function RootLayout({

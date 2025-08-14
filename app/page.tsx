@@ -292,7 +292,7 @@ export default function HomePage() {
                     />
                   </div>
                   <CardHeader>
-                    <CardTitle className="line-clamp-2">Festival Budaya Desa Makmur 2024</CardTitle>
+                    <CardTitle className="line-clamp-2">Festival Budaya Desa Karangampel 2025</CardTitle>
                     <CardDescription>15 Desember 2024</CardDescription>
                   </CardHeader>
                   <CardContent>
