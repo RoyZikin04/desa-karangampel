@@ -16,7 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // Import komponen upload gambar dan fungsi penyimpanan lokal
 import { ImageUpload } from "@/components/image-upload"
-import { umkmStorage } from "@/lib/local-storage"
+import { tambahUMKM } from "@/lib/database"
 
 export default function DaftarUMKMPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -50,25 +50,32 @@ export default function DaftarUMKMPage() {
 
     // Simpan data UMKM ke localStorage
     const umkmData = {
-      namaUsaha: formData.namaUsaha,
+      nama_usaha: formData.namaUsaha,
       kategori: formData.kategori,
       deskripsi: formData.deskripsi,
       alamat: formData.alamat,
       telepon: formData.telepon,
       email: formData.email,
       website: formData.website,
-      jamOperasional: formData.jamOperasional,
-      hargaMin: Number.parseInt(formData.hargaMin) || 0,
-      hargaMax: Number.parseInt(formData.hargaMax) || 0,
-      produkUtama: formData.produkUtama,
-      namaOwner: formData.namaOwner,
-      nikOwner: formData.nikOwner,
-      fotoUrl: formData.fotoUrl,
-      fotoTempatUrl: formData.fotoTempatUrl,
-    }
+      jam_operasional: formData.jamOperasional,
+      harga_min: Number.parseInt(formData.hargaMin) || 0,
+      harga_max: Number.parseInt(formData.hargaMax) || 0,
+      produk_utama: formData.produkUtama,
+      nama_owner: formData.namaOwner,
+      nik_owner: formData.nikOwner,
+      foto_url: formData.fotoUrl,
+      foto_tempat_url: formData.fotoTempatUrl,
+    };
 
     // Simpan ke localStorage
-    umkmStorage.add(umkmData)
+
+    try {
+      await tambahUMKM(umkmData);
+    } catch (error) {
+      console.error("Gagal menyimpan UMKM:", error);
+      alert(`Gagal menyimpan: ${JSON.stringify(error, null, 2)}`);
+    }
+
 
     setSubmitSuccess(true)
     setIsSubmitting(false)

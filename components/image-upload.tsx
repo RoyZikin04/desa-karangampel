@@ -1,21 +1,17 @@
-"use client"
-
-import type React from "react"
-
-import { useState, useRef } from "react"
-import { Upload, Camera, X, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { imageStorage } from "@/lib/local-storage"
-import Image from "next/image"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { supabase } from "@/lib/supabaseClient";
+import { useState, useRef } from "react";
+import { Upload, Camera, X, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ImageUploadProps {
-  onImageUpload: (imageUrl: string) => void
-  currentImage?: string
-  label: string
-  required?: boolean
-  maxSize?: number // in MB
-  acceptedFormats?: string[]
+  onImageUpload: (imageUrl: string) => void;
+  currentImage?: string;
+  label: string;
+  required?: boolean;
+  maxSize?: number; // in MB
+  acceptedFormats?: string[];
 }
 
 export function ImageUpload({
@@ -26,52 +22,63 @@ export function ImageUpload({
   maxSize = 5,
   acceptedFormats = ["image/jpeg", "image/jpg", "image/png", "image/webp"],
 }: ImageUploadProps) {
-  const [uploading, setUploading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(currentImage || null)
-  const [error, setError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(currentImage || null);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    setError(null)
+    setError(null);
 
     if (!acceptedFormats.includes(file.type)) {
       setError(
-        `Format file tidak didukung. Gunakan: ${acceptedFormats.map((f) => f.split("/")[1].toUpperCase()).join(", ")}`,
-      )
-      return
+        `Format file tidak didukung. Gunakan: ${acceptedFormats.map((f) => f.split("/")[1].toUpperCase()).join(", ")}`
+      );
+      return;
     }
 
     if (file.size > maxSize * 1024 * 1024) {
-      setError(`Ukuran file terlalu besar. Maksimal ${maxSize}MB`)
-      return
+      setError(`Ukuran file terlalu besar. Maksimal ${maxSize}MB`);
+      return;
     }
 
-    setUploading(true)
+    setUploading(true);
 
     try {
-      const imageUrl = await imageStorage.saveImage(file)
-      setPreview(imageUrl)
-      onImageUpload(imageUrl)
-      console.log(`✅ Upload berhasil: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`)
+      const fileName = `${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("uploads") // nama bucket di Supabase
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Ambil URL publik
+      const { data } = supabase.storage.from("uploads").getPublicUrl(fileName);
+      const publicUrl = data.publicUrl;
+
+      setPreview(publicUrl);
+      onImageUpload(publicUrl);
+
+      console.log(`✅ Upload berhasil: ${file.name}`);
     } catch (error) {
-      console.error("❌ Upload gagal:", error)
-      setError("Gagal mengupload gambar. Silakan coba lagi.")
+      console.error("❌ Upload gagal:", error);
+      setError("Gagal mengupload gambar. Silakan coba lagi.");
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   const handleRemoveImage = () => {
-    setPreview(null)
-    onImageUpload("")
-    setError(null)
+    setPreview(null);
+    onImageUpload("");
+    setError(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+      fileInputRef.current.value = "";
     }
-  }
+  };
 
   return (
     <div>
@@ -94,10 +101,6 @@ export function ImageUpload({
               alt="Preview"
               fill
               className="object-cover"
-              onError={() => {
-                setError("Gagal memuat preview gambar")
-                setPreview(null)
-              }}
             />
           </div>
           <Button
@@ -135,5 +138,5 @@ export function ImageUpload({
         className="hidden"
       />
     </div>
-  )
+  );
 }

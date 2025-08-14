@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // Import komponen upload gambar dan fungsi penyimpanan lokal
 import { ImageUpload } from "@/components/image-upload"
-import { beritaStorage } from "@/lib/local-storage"
+import { tambahBerita } from "@/lib/database"
 
 export default function BuatBeritaPage() {
   const router = useRouter()
@@ -53,7 +53,7 @@ export default function BuatBeritaPage() {
     }
 
     // Simpan ke localStorage
-    beritaStorage.add(beritaData)
+    await tambahBerita(beritaData);
 
     setSubmitSuccess(true)
     setIsSubmitting(false)
