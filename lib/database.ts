@@ -14,4 +14,3 @@ export async function tambahBerita(data: any) {
   const { error } = await supabase.from("berita").insert([data]);
   if (error) throw error;
 }
-

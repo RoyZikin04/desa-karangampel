@@ -16,6 +16,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 // Import komponen upload gambar dan fungsi penyimpanan lokal
 import { ImageUpload } from "@/components/image-upload"
 import { tambahBerita } from "@/lib/database"
+import { supabase } from "@/lib/supabaseClient";
+
 
 export default function BuatBeritaPage() {
   const router = useRouter()
@@ -34,35 +36,47 @@ export default function BuatBeritaPage() {
 
   // Update fungsi handleSubmit untuk menyimpan berita ke localStorage
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitSuccess(false);
 
-    // CATATAN: Simulasi penyimpanan berita - data akan disimpan ke localStorage
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      let gambarUrl = formData.gambarUrl;
 
-    // Simpan berita ke localStorage
-    const beritaData = {
-      judul: formData.judul,
-      kategori: formData.kategori,
-      ringkasan: formData.ringkasan,
-      konten: formData.konten,
-      penulis: formData.penulis || "Admin Desa",
-      tanggal: formData.tanggal,
-      status: formData.status as "draft" | "published" | "scheduled",
-      gambarUrl: formData.gambarUrl,
+      // Kalau user upload gambar baru (bukan URL existing)
+      if (gambarUrl && !gambarUrl.startsWith("http")) {
+        const fileName = `${Date.now()}-berita.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from("uploads")
+          .upload(fileName, gambarUrl);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage.from("uploads").getPublicUrl(fileName);
+        gambarUrl = data.publicUrl;
+      }
+
+      await tambahBerita({
+        judul: formData.judul,
+        kategori: formData.kategori,
+        ringkasan: formData.ringkasan,
+        konten: formData.konten,
+        penulis: formData.penulis || "Admin Desa",
+        tanggal: formData.tanggal,
+        status: formData.status,
+        gambar_url: gambarUrl,
+      });
+
+      setSubmitSuccess(true);
+      setTimeout(() => router.push("/admin"), 2000);
+    } catch (error) {
+      console.error("Gagal menyimpan berita:", error);
+      alert(`Gagal menyimpan berita: ${JSON.stringify(error, null, 2)}`);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Simpan ke localStorage
-    await tambahBerita(beritaData);
-
-    setSubmitSuccess(true)
-    setIsSubmitting(false)
-
-    // Redirect ke halaman admin setelah berhasil
-    setTimeout(() => {
-      router.push("/admin")
-    }, 2000)
   }
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
