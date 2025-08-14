@@ -1,5 +1,6 @@
 "use client"
 
+import { supabase } from "@/lib/supabaseClient";
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -15,25 +16,57 @@ export default function BeritaPage() {
 
   // Load data berita yang sudah dipublikasi
   useEffect(() => {
-    // Inisialisasi data demo jika belum ada
-    initializeDemoData()
+    initializeDemoData();
 
-    const loadData = () => {
-      const publishedBerita = beritaStorage.getPublished()
-      setBeritaList(publishedBerita)
+    const fetchBerita = async () => {
+      try {
+        // Ambil dari local-storage (kode lama)
+        const localBerita = beritaStorage.getPublished();
+        
+        
+        // Ambil dari Supabase
+        
+        const { data, error } = await supabase
+        .from("berita")
+        .select("*")
+        .eq("status", "published")
+        .order("tanggal", { ascending: false });
 
-      // Set berita terbaru sebagai featured
-      if (publishedBerita.length > 0) {
-        setFeaturedBerita(publishedBerita[0])
+        if (error) {
+          console.error("Gagal mengambil berita dari Supabase:", error);
+          setBeritaList(localBerita); // fallback
+          return;
+        }
+        
+        // Tambahkan slug kalau tidak ada
+        const beritaWithSlug = (data || []).map((item) => ({
+          ...item,
+          // normalisasi slug
+          slug:
+            item.slug ||
+            `${item.judul
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+              .replace(/[^a-z0-9-]/g, "")}-${item.id}`,
+          // normalisasi URL gambar
+          gambarUrl: item.gambarUrl || item.gambar_url || "",
+          // normalisasi field opsional
+          ringkasan: item.ringkasan || "",
+          konten: item.konten || item.isi || "",
+        }));
+
+
+        // Gabungkan keduanya (Supabase + Local)
+        const combined = [...beritaWithSlug, ...localBerita];
+        setBeritaList(combined);
+      } catch (err) {
+        console.error("Error memuat berita:", err);
       }
-    }
+    };
 
-    loadData()
+    fetchBerita();
+  }, []);
 
-    // Update data setiap 2 detik untuk menampilkan berita baru
-    const interval = setInterval(loadData, 2000)
-    return () => clearInterval(interval)
-  }, [])
 
   const getCategoryLabel = (category: string) => {
     const labels: { [key: string]: string } = {

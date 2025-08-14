@@ -1,5 +1,6 @@
 "use client"
 
+import { supabase } from "@/lib/supabaseClient"; // pastikan ini ada di atas
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
@@ -15,13 +16,65 @@ export default function DetailBeritaPage() {
   const [berita, setBerita] = useState<Berita | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const slug = params.slug as string
-    const foundBerita = beritaStorage.getBySlug(slug)
+useEffect(() => {
+  const fetchBerita = async () => {
+    const slugParam = String(params.slug);
 
-    setBerita(foundBerita)
-    setLoading(false)
-  }, [params.slug])
+    // 1) Cek local-storage (kode lama)
+    let found: Berita | null = beritaStorage.getBySlug(slugParam);
+
+    // 2) Kalau tidak ada di local, coba ke Supabase
+    if (!found) {
+      // a) coba by slug persis
+      const { data: bySlug, error: errSlug } = await supabase
+        .from("berita")
+        .select("*")
+        .eq("slug", slugParam)
+        .maybeSingle(); // biar gak error kalau 0 row
+
+      let row: any = bySlug;
+
+      // b) kalau belum ketemu, coba ekstrak id di akhir slug: ...-12345
+      if (!row) {
+        const tail = slugParam.split("-").pop();
+        if (tail && /^\d+$/.test(tail)) {
+          const { data: byId } = await supabase
+            .from("berita")
+            .select("*")
+            .eq("id", Number(tail))
+            .maybeSingle();
+          row = byId ?? null;
+        }
+      }
+
+      if (row) {
+        // 3) Normalisasi kolom dari Supabase -> shape Berita (camelCase)
+        const normalized: Berita = {
+          id: row.id,
+          judul: row.judul,
+          kategori: row.kategori,
+          ringkasan: row.ringkasan ?? "",
+          gambarUrl: row.gambar_url ?? row.gambarUrl ?? "",
+          slug: row.slug ?? slugParam,
+          tanggal: row.tanggal ?? new Date().toISOString(),
+          penulis: row.penulis ?? "Admin Desa",
+          konten: row.konten ?? row.isi ?? row.content ?? "",
+          status: row.status ?? "published",
+        };
+        found = normalized;
+      } else if (errSlug) {
+        // Kalau Supabase balikin error beneran (bukan sekadar 0 row)
+        console.error("Supabase error:", errSlug);
+      }
+    }
+
+    setBerita(found || null);
+    setLoading(false);
+  };
+
+  fetchBerita();
+}, [params.slug]);
+
 
   const getCategoryLabel = (category: string) => {
     const labels: { [key: string]: string } = {
@@ -193,7 +246,7 @@ export default function DetailBeritaPage() {
                     />
                   </div>
                   <CardContent className="p-4">
-                    <Badge className={`${getCategoryColor(relatedBerita.kategori)} mb-2`} size="sm">
+                    <Badge className={`${getCategoryColor(relatedBerita.kategori)} mb-2`}>
                       {getCategoryLabel(relatedBerita.kategori)}
                     </Badge>
                     <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{relatedBerita.judul}</h3>
