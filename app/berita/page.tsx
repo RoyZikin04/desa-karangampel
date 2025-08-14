@@ -298,8 +298,13 @@ export default function BeritaPage() {
                   <CardContent>
                     <p className="text-gray-600 mb-4">{upcomingEvent.ringkasan}</p>
                     <div className="text-sm text-gray-500">
-                      <p>📍 Lokasi: {upcomingEvent.lokasi}</p>
-                      <p>🕐 Waktu: {upcomingEvent.waktu}</p>
+                      {/* Lokasi dan Waktu hanya ditampilkan jika properti tersedia */}
+                      {"lokasi" in upcomingEvent && (
+                        <p>📍 Lokasi: {(upcomingEvent as any).lokasi}</p>
+                      )}
+                      {"waktu" in upcomingEvent && (
+                        <p>🕐 Waktu: {(upcomingEvent as any).waktu}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

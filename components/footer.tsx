@@ -19,11 +19,11 @@ export default function Footer() {
                 className="rounded-full"
               />
               {/* CATATAN: Ganti dengan nama desa Anda */}
-              <span className="text-xl font-bold">Desa Makmur</span>
+              <span className="text-xl font-bold">Desa Karangampel</span>
             </div>
             {/* CATATAN: Ganti dengan deskripsi desa Anda */}
             <p className="text-gray-300 mb-4 max-w-md">
-              Desa Makmur adalah desa yang berkomitmen untuk mengembangkan ekonomi lokal melalui pemberdayaan UMKM dan
+              Desa Karangampel adalah desa yang berkomitmen untuk mengembangkan ekonomi lokal melalui pemberdayaan UMKM dan
               pelestarian budaya tradisional.
             </p>
             <div className="flex space-x-4">
@@ -108,7 +108,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-300 text-sm">© 2024 Desa Makmur. Semua hak cipta dilindungi.</p>
+          <p className="text-gray-300 text-sm">© 2025 Desa Karangampel. Semua hak cipta dilindungi.</p>
         </div>
       </div>
     </footer>

@@ -11,7 +11,7 @@ export default function TentangDesaPage() {
         {/* CATATAN: Ganti dengan foto pemandangan desa Anda */}
         <Image src="/tentangdesa.jpg?height=400&width=1200" alt="Pemandangan Desa" fill className="object-cover" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Tentang Desa Makmur</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Tentang Desa Karangampel</h1>
           <p className="text-xl">Mengenal lebih dekat sejarah, budaya, dan potensi desa kami</p>
         </div>
       </section>
@@ -25,7 +25,7 @@ export default function TentangDesaPage() {
               {/* CATATAN: Ganti dengan sejarah desa Anda */}
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Desa Makmur didirikan pada tahun 1945 oleh para pendiri yang memiliki visi untuk menciptakan komunitas
+                  Desa Karangampel didirikan pada tahun 1945 oleh para pendiri yang memiliki visi untuk menciptakan komunitas
                   yang sejahtera dan harmonis. Nama "Makmur" dipilih sebagai harapan agar desa ini selalu berkembang dan
                   penduduknya hidup dalam kemakmuran.
                 </p>
@@ -35,7 +35,7 @@ export default function TentangDesaPage() {
                   tulang punggung ekonomi desa.
                 </p>
                 <p>
-                  Pada tahun 2010, Desa Makmur mulai fokus pada pengembangan UMKM dan pariwisata berbasis komunitas,
+                  Pada tahun 2010, Desa Karangampel mulai fokus pada pengembangan UMKM dan pariwisata berbasis komunitas,
                   yang berhasil meningkatkan kesejahteraan masyarakat secara signifikan.
                 </p>
               </div>
@@ -104,7 +104,7 @@ export default function TentangDesaPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Data Demografi</h2>
-            <p className="text-xl text-gray-600">Informasi kependudukan Desa Makmur</p>
+            <p className="text-xl text-gray-600">Informasi kependudukan Desa Karangampel</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

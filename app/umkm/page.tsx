@@ -86,7 +86,7 @@ export default function UMKMPage() {
         {/* CATATAN: Ganti dengan foto UMKM atau pasar desa */}
         <Image src="/placeholder.svg?height=300&width=1200" alt="UMKM Desa" fill className="object-cover" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">UMKM Desa Makmur</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">UMKM Desa Karangampel</h1>
           <p className="text-xl">Temukan produk berkualitas dari usaha mikro, kecil, dan menengah lokal</p>
           <p className="text-sm mt-2 opacity-90">{umkmList.length} UMKM terdaftar dan aktif</p>
         </div>
@@ -230,7 +230,7 @@ export default function UMKMPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ingin Mendaftarkan UMKM Anda?</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Bergabunglah dengan komunitas UMKM Desa Makmur dan tingkatkan jangkauan bisnis Anda
+            Bergabunglah dengan komunitas UMKM Desa Karangampel dan tingkatkan jangkauan bisnis Anda
           </p>
           <Button size="lg" variant="secondary" asChild>
             <a href="/daftar-umkm">Daftar UMKM Sekarang</a>

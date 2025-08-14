@@ -29,7 +29,7 @@ export default function KontakPage() {
 
     try {
       const emailBody = `
-PESAN DARI WEBSITE DESA MAKMUR
+PESAN DARI WEBSITE Desa Karangampel
 ================================
 
 Nama Pengirim: ${formData.nama}
@@ -41,7 +41,7 @@ PESAN:
 ${formData.pesan}
 
 ================================
-Dikirim melalui website resmi Desa Makmur
+Dikirim melalui website resmi Desa Karangampel
 Tanggal: ${new Date().toLocaleDateString("id-ID", {
         year: "numeric",
         month: "long",
@@ -203,13 +203,13 @@ Tanggal: ${new Date().toLocaleDateString("id-ID", {
                         <h3 className="font-semibold text-lg mb-2">Alamat</h3>
                         {/* CATATAN: Ganti dengan alamat lengkap desa Anda */}
                         <p className="text-gray-600">
-                          Jl. Raya Desa No. 123
+                          Jl. Raya Desa
                           <br />
-                          Desa Makmur, Kecamatan Makmur
+                          Desa Karangampel, Kecamatan Karangampel
                           <br />
-                          Kabupaten Sejahtera 12345
+                          Kabupaten Indramayu
                           <br />
-                          Provinsi Jawa Tengah
+                          Provinsi Jawa Barat
                         </p>
                       </div>
                     </div>

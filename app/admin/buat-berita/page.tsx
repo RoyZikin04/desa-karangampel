@@ -277,7 +277,7 @@ export default function BuatBeritaPage() {
                 <div className="space-y-3">
                   {/* CATATAN: Data ini bisa diambil dari database */}
                   <div className="text-sm">
-                    <p className="font-medium line-clamp-2">Festival Budaya Desa Makmur 2024</p>
+                    <p className="font-medium line-clamp-2">Festival Budaya Desa Karangampel 2024</p>
                     <p className="text-gray-500 text-xs">15 Des 2024</p>
                   </div>
                   <div className="text-sm">

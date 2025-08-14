@@ -113,7 +113,7 @@ export default function DaftarUMKMPage() {
         <Image src="/placeholder.svg?height=300&width=1200" alt="Daftar UMKM" fill className="object-cover" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Daftarkan UMKM Anda</h1>
-          <p className="text-xl">Bergabunglah dengan komunitas UMKM Desa Makmur dan kembangkan bisnis Anda</p>
+          <p className="text-xl">Bergabunglah dengan komunitas UMKM Desa Karangampel dan kembangkan bisnis Anda</p>
         </div>
       </section>
 

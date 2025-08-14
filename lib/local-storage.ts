@@ -405,7 +405,13 @@ export const dashboardStats = {
     const beritaList = beritaStorage.getAll()
     const reviewList = reviewStorage.getAll()
 
-    const activities = []
+    type Activity = {
+      type: "umkm" | "berita" | "review"
+      message: string
+      time: string
+      icon: string
+    }
+    const activities: Activity[] = []
 
     // Recent UMKM registrations
     const recentUMKM = umkmList
@@ -518,12 +524,12 @@ export const initializeDemoData = () => {
   if (beritaStorage.getAll().length === 0) {
     const demoBerita = [
       {
-        judul: "Festival Budaya Desa Makmur 2024 Sukses Digelar",
+        judul: "Festival Budaya Desa Karangampel 2024 Sukses Digelar",
         kategori: "acara",
         ringkasan:
           "Festival tahunan yang menampilkan berbagai kesenian tradisional, pameran produk UMKM, dan kuliner khas desa berhasil menarik ribuan pengunjung dari berbagai daerah.",
         konten:
-          "Festival Budaya Desa Makmur 2024 telah sukses digelar pada tanggal 15 Desember 2024 di Lapangan Desa Makmur. Acara yang berlangsung selama tiga hari ini menampilkan berbagai kesenian tradisional seperti tari-tarian daerah, musik gamelan, dan pertunjukan wayang kulit.\n\nSelain pertunjukan seni, festival ini juga menghadirkan pameran produk UMKM lokal yang memamerkan berbagai kerajinan tangan, makanan tradisional, dan produk pertanian organik. Para pengunjung dapat langsung membeli produk-produk berkualitas dari masyarakat desa.\n\nKepala Desa Makmur, Bapak Suharto, menyampaikan rasa syukur atas kesuksesan acara ini. 'Festival ini tidak hanya sebagai ajang hiburan, tetapi juga sebagai sarana promosi potensi desa dan mempererat silaturahmi antar warga,' ujarnya.\n\nAcara ini berhasil menarik lebih dari 5.000 pengunjung dari berbagai daerah dan diharapkan dapat menjadi agenda tahunan yang semakin berkembang.",
+          "Festival Budaya Desa Karangampel 2024 telah sukses digelar pada tanggal 15 Desember 2024 di Lapangan Desa Karangampel. Acara yang berlangsung selama tiga hari ini menampilkan berbagai kesenian tradisional seperti tari-tarian daerah, musik gamelan, dan pertunjukan wayang kulit.\n\nSelain pertunjukan seni, festival ini juga menghadirkan pameran produk UMKM lokal yang memamerkan berbagai kerajinan tangan, makanan tradisional, dan produk pertanian organik. Para pengunjung dapat langsung membeli produk-produk berkualitas dari masyarakat desa.\n\nKepala Desa Karangampel, Bapak Suharto, menyampaikan rasa syukur atas kesuksesan acara ini. 'Festival ini tidak hanya sebagai ajang hiburan, tetapi juga sebagai sarana promosi potensi desa dan mempererat silaturahmi antar warga,' ujarnya.\n\nAcara ini berhasil menarik lebih dari 5.000 pengunjung dari berbagai daerah dan diharapkan dapat menjadi agenda tahunan yang semakin berkembang.",
         penulis: "Admin Desa",
         tanggal: "2024-12-15",
         status: "published" as const,
@@ -534,7 +540,7 @@ export const initializeDemoData = () => {
         ringkasan:
           "Sebanyak 30 pelaku UMKM mengikuti pelatihan digital marketing yang diselenggarakan oleh pemerintah desa bekerjasama dengan dinas koperasi kabupaten.",
         konten:
-          "Pemerintah Desa Makmur bekerjasama dengan Dinas Koperasi Kabupaten Sejahtera menggelar pelatihan digital marketing untuk pelaku UMKM pada tanggal 10 Desember 2024. Pelatihan yang diikuti oleh 30 peserta ini bertujuan untuk meningkatkan kemampuan pemasaran digital para pelaku usaha lokal.\n\nMateri pelatihan meliputi penggunaan media sosial untuk promosi, pembuatan konten yang menarik, strategi penjualan online, dan pengelolaan toko online. Para peserta juga diajarkan cara menggunakan platform e-commerce dan aplikasi pembayaran digital.\n\nNarasumber pelatihan, Ibu Dr. Siti Nurhaliza dari Universitas Digital Indonesia, menekankan pentingnya adaptasi teknologi dalam dunia usaha. 'Era digital menuntut pelaku UMKM untuk memanfaatkan teknologi agar dapat bersaing dan menjangkau pasar yang lebih luas,' jelasnya.\n\nSalah satu peserta, Ibu Sari pemilik Kerajinan Bambu Berkah, mengaku sangat terbantu dengan pelatihan ini. 'Sekarang saya lebih paham cara mempromosikan produk di Instagram dan Facebook. Penjualan saya meningkat 50% setelah menerapkan ilmu dari pelatihan ini,' ungkapnya.",
+          "Pemerintah Desa Karangampel bekerjasama dengan Dinas Koperasi Kabupaten Sejahtera menggelar pelatihan digital marketing untuk pelaku UMKM pada tanggal 10 Desember 2024. Pelatihan yang diikuti oleh 30 peserta ini bertujuan untuk meningkatkan kemampuan pemasaran digital para pelaku usaha lokal.\n\nMateri pelatihan meliputi penggunaan media sosial untuk promosi, pembuatan konten yang menarik, strategi penjualan online, dan pengelolaan toko online. Para peserta juga diajarkan cara menggunakan platform e-commerce dan aplikasi pembayaran digital.\n\nNarasumber pelatihan, Ibu Dr. Siti Nurhaliza dari Universitas Digital Indonesia, menekankan pentingnya adaptasi teknologi dalam dunia usaha. 'Era digital menuntut pelaku UMKM untuk memanfaatkan teknologi agar dapat bersaing dan menjangkau pasar yang lebih luas,' jelasnya.\n\nSalah satu peserta, Ibu Sari pemilik Kerajinan Bambu Berkah, mengaku sangat terbantu dengan pelatihan ini. 'Sekarang saya lebih paham cara mempromosikan produk di Instagram dan Facebook. Penjualan saya meningkat 50% setelah menerapkan ilmu dari pelatihan ini,' ungkapnya.",
         penulis: "Tim Humas Desa",
         tanggal: "2024-12-10",
         status: "published" as const,
