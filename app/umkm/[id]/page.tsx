@@ -7,22 +7,49 @@ import { ArrowLeft, MapPin, Phone, Mail, Globe, Clock, Share2 } from "lucide-rea
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { umkmStorage, type UMKM } from "@/lib/local-storage"
+import { supabase } from "@/lib/supabaseClient"
 import { GoogleMaps } from "@/components/google-maps"
 import { ReviewSystem } from "@/components/review-system"
 
 export default function DetailUMKMPage() {
   const params = useParams()
   const router = useRouter()
-  const [umkm, setUmkm] = useState<UMKM | null>(null)
+  const [umkm, setUmkm] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
+  const [related, setRelated] = useState<any[]>([])
 
   useEffect(() => {
-    const id = params.id as string
-    const foundUmkm = umkmStorage.getById(id)
+    const fetchUMKM = async () => {
+      const { data, error } = await supabase
+        .from("umkm")
+        .select("*")
+        .eq("id", params.id)
+        .maybeSingle()
 
-    setUmkm(foundUmkm)
-    setLoading(false)
+      if (error) {
+        console.error("Gagal ambil detail UMKM:", error)
+        return
+      }
+
+      if (data) {
+        setUmkm(data)
+
+        // ambil UMKM sejenis
+        const { data: relatedData } = await supabase
+          .from("umkm")
+          .select("*")
+          .eq("kategori", data.kategori)
+          .eq("status", "approved")
+          .neq("id", data.id)
+          .limit(3)
+
+        setRelated(relatedData || [])
+      }
+
+      setLoading(false)
+    }
+
+    fetchUMKM()
   }, [params.id])
 
   const getCategoryLabel = (category: string) => {
@@ -84,7 +111,7 @@ export default function DetailUMKMPage() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Kembali
             </Button>
-            <h1 className="text-lg font-semibold text-gray-900 line-clamp-1">{umkm.namaUsaha}</h1>
+            <h1 className="text-lg font-semibold text-gray-900 line-clamp-1">{umkm.nama_usaha}</h1>
           </div>
         </div>
       </div>
@@ -98,8 +125,8 @@ export default function DetailUMKMPage() {
             <Card className="overflow-hidden">
               <div className="relative h-64 md:h-96">
                 <Image
-                  src={umkm.fotoUrl || "/placeholder.svg?height=400&width=800"}
-                  alt={umkm.namaUsaha}
+                  src={umkm.foto_url || "/placeholder.svg?height=400&width=800"}
+                  alt={umkm.nama_usaha}
                   fill
                   className="object-cover"
                 />
@@ -116,7 +143,7 @@ export default function DetailUMKMPage() {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{umkm.namaUsaha}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{umkm.nama_usaha}</h1>
                     <p className="text-gray-600 flex items-center">
                       <MapPin className="h-4 w-4 mr-1" />
                       {umkm.alamat}
@@ -124,7 +151,7 @@ export default function DetailUMKMPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-blue-600">
-                      Rp {umkm.hargaMin.toLocaleString()} - {umkm.hargaMax.toLocaleString()}
+                      Rp {umkm.harga_min?.toLocaleString()} - {umkm.harga_max?.toLocaleString()}
                     </p>
                     <p className="text-sm text-gray-500">Range harga</p>
                   </div>
@@ -141,13 +168,13 @@ export default function DetailUMKMPage() {
                 <p className="text-gray-700 leading-relaxed mb-4">{umkm.deskripsi}</p>
                 <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
                   <h4 className="font-semibold text-gray-900 mb-2">Produk/Jasa Utama:</h4>
-                  <p className="text-gray-700">{umkm.produkUtama}</p>
+                  <p className="text-gray-700">{umkm.produk_utama}</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Gallery */}
-            {umkm.fotoTempatUrl && (
+            {(umkm.foto_tempat_url || umkm.foto_url) && (
               <Card>
                 <CardHeader>
                   <CardTitle>Galeri</CardTitle>
@@ -156,7 +183,7 @@ export default function DetailUMKMPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="relative h-48 rounded-lg overflow-hidden">
                       <Image
-                        src={umkm.fotoUrl || "/placeholder.svg?height=200&width=300"}
+                        src={umkm.foto_url || "/placeholder.svg?height=200&width=300"}
                         alt="Produk"
                         fill
                         className="object-cover"
@@ -165,23 +192,25 @@ export default function DetailUMKMPage() {
                         Produk
                       </div>
                     </div>
-                    <div className="relative h-48 rounded-lg overflow-hidden">
-                      <Image
-                        src={umkm.fotoTempatUrl || "/placeholder.svg?height=200&width=300"}
-                        alt="Tempat Usaha"
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                        Tempat Usaha
+                    {umkm.foto_tempat_url && (
+                      <div className="relative h-48 rounded-lg overflow-hidden">
+                        <Image
+                          src={umkm.foto_tempat_url || "/placeholder.svg?height=200&width=300"}
+                          alt="Tempat Usaha"
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                          Tempat Usaha
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            <ReviewSystem umkmId={umkm.id} umkmName={umkm.namaUsaha} />
+            <ReviewSystem umkmId={umkm.id} umkmName={umkm.nama_usaha} />
           </div>
 
           {/* Sidebar */}
@@ -228,12 +257,12 @@ export default function DetailUMKMPage() {
                     </div>
                   </div>
                 )}
-                {umkm.jamOperasional && (
+                {umkm.jam_operasional && (
                   <div className="flex items-center gap-3">
                     <Clock className="h-5 w-5 text-blue-600" />
                     <div>
                       <p className="font-medium">Jam Operasional</p>
-                      <p className="text-gray-600">{umkm.jamOperasional}</p>
+                      <p className="text-gray-600">{umkm.jam_operasional}</p>
                     </div>
                   </div>
                 )}
@@ -249,10 +278,10 @@ export default function DetailUMKMPage() {
                 <div className="text-center">
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-xl font-semibold text-gray-600">
-                      {umkm.namaOwner.charAt(0).toUpperCase()}
+                      {umkm.nama_owner?.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-gray-900">{umkm.namaOwner}</h3>
+                  <h3 className="font-semibold text-gray-900">{umkm.nama_owner}</h3>
                   <p className="text-sm text-gray-600">Pemilik Usaha</p>
                 </div>
               </CardContent>
@@ -263,7 +292,7 @@ export default function DetailUMKMPage() {
               <CardContent className="p-4 space-y-3">
                 <Button className="w-full" size="lg" asChild>
                   <a
-                    href={`https://wa.me/${umkm.telepon.replace(/^0/, "62")}`}
+                    href={`https://wa.me/${umkm.telepon?.replace(/^0/, "62")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -278,33 +307,30 @@ export default function DetailUMKMPage() {
               </CardContent>
             </Card>
 
-            <GoogleMaps address={umkm.alamat} businessName={umkm.namaUsaha} />
+            <GoogleMaps address={umkm.alamat} businessName={umkm.nama_usaha} />
           </div>
         </div>
 
         {/* Related UMKM */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">UMKM Sejenis</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {umkmStorage
-              .getApproved()
-              .filter((u) => u.id !== umkm.id && u.kategori === umkm.kategori)
-              .slice(0, 3)
-              .map((relatedUmkm) => (
+        {related.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">UMKM Sejenis</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {related.map((relatedUmkm) => (
                 <Card key={relatedUmkm.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="relative h-32">
                     <Image
-                      src={relatedUmkm.fotoUrl || "/placeholder.svg?height=128&width=300"}
-                      alt={relatedUmkm.namaUsaha}
+                      src={relatedUmkm.foto_url || "/placeholder.svg?height=128&width=300"}
+                      alt={relatedUmkm.nama_usaha}
                       fill
                       className="object-cover rounded-t-lg"
                     />
                   </div>
                   <CardContent className="p-4">
-                    <Badge className={`${getCategoryColor(relatedUmkm.kategori)} mb-2`} size="sm">
+                    <Badge className={`${getCategoryColor(relatedUmkm.kategori)} mb-2`}>
                       {getCategoryLabel(relatedUmkm.kategori)}
                     </Badge>
-                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">{relatedUmkm.namaUsaha}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">{relatedUmkm.nama_usaha}</h3>
                     <p className="text-sm text-gray-600 line-clamp-2 mb-3">{relatedUmkm.deskripsi}</p>
                     <Button variant="outline" size="sm" asChild>
                       <a href={`/umkm/${relatedUmkm.id}`}>Lihat Detail</a>
@@ -312,8 +338,9 @@ export default function DetailUMKMPage() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

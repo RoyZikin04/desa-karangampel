@@ -1,5 +1,6 @@
 "use client"
 
+import { supabase } from "@/lib/supabaseClient"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Search, Eye, Edit, Trash2, Calendar, User } from "lucide-react"
@@ -25,30 +26,98 @@ export default function KelolaBeritaPage() {
 
   // Load data dari localStorage
   useEffect(() => {
-    const loadData = () => {
-      const data = beritaStorage.getAll()
-      setBeritaList(data.sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()))
+    const fetchData = async () => {
+      // Ambil dari Supabase
+      const { data: supaData, error } = await supabase
+        .from("berita")
+        .select("*")
+        .order("tanggal", { ascending: false });
+
+      if (error) {
+        console.error("Gagal mengambil berita:", error);
+        return;
+      }
+
+      // Ambil dari localStorage
+      const localData = beritaStorage.getAll();
+
+      // Buang berita dari localStorage yang SUDAH ada di Supabase
+      // (supaya tidak double / muncul lagi setelah dihapus)
+      const filteredLocal = localData.filter(
+        localItem => !supaData.some(supaItem => supaItem.id === localItem.id)
+      );
+
+      // Gabungkan hasil (Supabase + sisa lokal)
+      const mergedData = [...supaData, ...filteredLocal];
+
+      setBeritaList(mergedData);
+    };
+
+    fetchData();
+  }, []);
+
+
+  // Fungsi hapus berita
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch("/api/delete-berita", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      const result = await res.json();
+
+      if (result.error) {
+        console.error("Gagal menghapus berita:", result.error);
+        alert("Gagal menghapus berita: " + result.error);
+        return;
+      }
+
+      // Hapus juga dari localStorage
+      beritaStorage.delete(id);
+
+      // Update state supaya langsung hilang
+      setBeritaList((prev) => prev.filter((b) => b.id !== id));
+      setDeleteAlert(null);
+
+      alert("Berita berhasil dihapus!");
+    } catch (err: any) {
+      console.error("Error:", err.message);
+      alert("Terjadi kesalahan saat menghapus berita");
     }
+  };
 
-    loadData()
-    const interval = setInterval(loadData, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // Fungsi untuk menghapus berita
-  const handleDelete = (id: string) => {
-    beritaStorage.delete(id)
-    const updatedData = beritaStorage.getAll()
-    setBeritaList(updatedData)
-    setDeleteAlert(null)
-  }
 
   // Fungsi untuk mengubah status berita
-  const handleStatusChange = (id: string, newStatus: "draft" | "published" | "scheduled") => {
-    beritaStorage.update(id, { status: newStatus })
-    const updatedData = beritaStorage.getAll()
-    setBeritaList(updatedData)
-  }
+  const handleStatusChange = async (
+    id: string,
+    newStatus: "draft" | "published" | "scheduled"
+  ) => {
+    // Coba update ke Supabase dulu
+    const { data, error } = await supabase
+      .from("berita")
+      .update({ status: newStatus })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      // Jika gagal (mis. item hanya ada di localStorage), lanjutkan update lokal
+      console.warn("Gagal update status di Supabase, lanjut lokal:", error.message);
+    }
+
+    // Selalu update localStorage (untuk item lokal/offline)
+    beritaStorage.update(id, { status: newStatus });
+
+    // Update state React tanpa menghancurkan hasil merge Supabase+lokal
+    setBeritaList((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
+    );
+
+    // Segarkan Server Components (menu/sidebar)
+    router.refresh();
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {

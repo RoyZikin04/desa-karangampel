@@ -1,7 +1,7 @@
 "use client"
 
 import { Label } from "@/components/ui/label"
-
+import { supabase } from "@/lib/supabaseClient"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Search, Eye, Check, X, Phone, Mail, MapPin, Trash2 } from "lucide-react"
@@ -12,57 +12,85 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-// Import fungsi penyimpanan lokal
-import { umkmStorage, type UMKM } from "@/lib/local-storage"
 
 export default function KelolaUMKMPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedUMKM, setSelectedUMKM] = useState<any>(null)
-  const [deleteAlert, setDeleteAlert] = useState<string | null>(null)
+  const [deleteAlert, setDeleteAlert] = useState<number | null>(null)
 
   // Ganti data dummy dengan data dari localStorage
-  const [umkmList, setUmkmList] = useState<UMKM[]>([])
+  const [umkmList, setUmkmList] = useState<any[]>([])
 
-  // Load data dari localStorage saat komponen dimount
   useEffect(() => {
-    const loadData = () => {
-      const data = umkmStorage.getAll()
-      setUmkmList(data)
-    }
+    const fetchData = async () => {
+      const { data, error } = await supabase
+        .from("umkm")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    loadData()
+      if (error) {
+        console.error("Gagal mengambil UMKM:", JSON.stringify(error, null, 2));
+        return;
+      }
+      setUmkmList(data || []);
+    };
 
-    // Update data setiap 1 detik untuk sinkronisasi real-time
-    const interval = setInterval(loadData, 1000)
-    return () => clearInterval(interval)
-  }, [])
+    fetchData();
+  }, []);
 
-  // Update fungsi handleApprove untuk menggunakan localStorage
-  const handleApprove = (id: string) => {
-    umkmStorage.updateStatus(id, "approved")
-    const updatedData = umkmStorage.getAll()
-    setUmkmList(updatedData)
-    setSelectedUMKM(null)
-  }
 
-  // Update fungsi handleReject untuk menggunakan localStorage
-  const handleReject = (id: string) => {
-    umkmStorage.updateStatus(id, "rejected")
-    const updatedData = umkmStorage.getAll()
-    setUmkmList(updatedData)
-    setSelectedUMKM(null)
-  }
+  // Refresh UMKM list
+  const refreshUMKM = async () => {
+    const { data, error } = await supabase
+      .from("umkm")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  // Fungsi untuk menghapus UMKM
-  const handleDelete = (id: string) => {
-    umkmStorage.delete(id)
-    const updatedData = umkmStorage.getAll()
-    setUmkmList(updatedData)
-    setSelectedUMKM(null)
-    setDeleteAlert(null)
-  }
+    if (!error) setUmkmList(data || []);
+  };
+
+  // Approve
+  const handleApprove = async (id: number) => {
+    const { error } = await supabase
+      .from("umkm")
+      .update({ status: "approved" })
+      .eq("id", id);
+
+    if (error) return console.error("Gagal approve UMKM:", error);
+
+    await refreshUMKM();
+    setSelectedUMKM(null);
+  };
+
+
+  // Reject
+  const handleReject = async (id: number) => {
+    const { error } = await supabase
+      .from("umkm")
+      .update({ status: "rejected" })
+      .eq("id", id);
+
+    if (error) return console.error("Gagal reject UMKM:", error);
+
+    await refreshUMKM();
+    setSelectedUMKM(null);
+  };
+
+  // Delete
+  const handleDelete = async (id: number) => {
+    const { error } = await supabase
+      .from("umkm")
+      .delete()
+      .eq("id", id);
+
+    if (error) return console.error("Gagal hapus UMKM:", error);
+
+    await refreshUMKM();
+    setSelectedUMKM(null);
+    setDeleteAlert(null);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -91,8 +119,8 @@ export default function KelolaUMKMPage() {
 
   const filteredUMKM = umkmList.filter((umkm) => {
     const matchesSearch =
-      umkm.namaUsaha.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      umkm.namaOwner.toLowerCase().includes(searchTerm.toLowerCase())
+      umkm.nama_usaha?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      umkm.nama_owner?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || umkm.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -120,7 +148,7 @@ export default function KelolaUMKMPage() {
               <div className="flex items-center justify-between">
                 <span>Yakin ingin menghapus UMKM ini? Tindakan ini tidak dapat dibatalkan.</span>
                 <div className="flex gap-2 ml-4">
-                  <Button size="sm" variant="destructive" onClick={() => handleDelete(deleteAlert)}>
+                  <Button size="sm" variant="destructive" onClick={() => deleteAlert && handleDelete(deleteAlert)}>
                     Hapus
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => setDeleteAlert(null)}>
@@ -169,8 +197,8 @@ export default function KelolaUMKMPage() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{umkm.namaUsaha}</h3>
-                        <p className="text-sm text-gray-600 mb-2">Pemilik: {umkm.namaOwner}</p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{umkm.nama_usaha}</h3>
+                        <p className="text-sm text-gray-600 mb-2">Pemilik: {umkm.nama_owner}</p>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
                           <span className="flex items-center">
                             <MapPin className="h-4 w-4 mr-1" />
@@ -182,7 +210,7 @@ export default function KelolaUMKMPage() {
                       <div className="ml-4 text-right">
                         {getStatusBadge(umkm.status)}
                         <p className="text-xs text-gray-500 mt-2">
-                          Daftar: {new Date(umkm.tanggalDaftar).toLocaleDateString("id-ID")}
+                          Daftar: {new Date(umkm.created_at).toLocaleDateString("id-ID")}
                         </p>
                       </div>
                     </div>
@@ -193,7 +221,7 @@ export default function KelolaUMKMPage() {
                           {umkm.kategori}
                         </Badge>
                         <span className="text-sm text-gray-500">
-                          Rp {umkm.hargaMin.toLocaleString()} - {umkm.hargaMax.toLocaleString()}
+                          Rp {umkm.harga_min.toLocaleString()} - {umkm.harga_max.toLocaleString()}
                         </span>
                       </div>
 
@@ -251,14 +279,14 @@ export default function KelolaUMKMPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold text-lg">{selectedUMKM.namaUsaha}</h4>
+                    <h4 className="font-semibold text-lg">{selectedUMKM.nama_usaha}</h4>
                     {getStatusBadge(selectedUMKM.status)}
                   </div>
 
                   <div className="space-y-3">
                     <div>
                       <Label className="text-sm font-medium text-gray-700">Pemilik</Label>
-                      <p className="text-sm">{selectedUMKM.namaOwner}</p>
+                      <p className="text-sm">{selectedUMKM.nama_owner}</p>
                     </div>
 
                     <div>
@@ -298,13 +326,13 @@ export default function KelolaUMKMPage() {
                     <div>
                       <Label className="text-sm font-medium text-gray-700">Range Harga</Label>
                       <p className="text-sm">
-                        Rp {selectedUMKM.hargaMin.toLocaleString()} - {selectedUMKM.hargaMax.toLocaleString()}
+                        Rp {selectedUMKM.harga_min.toLocaleString()} - {selectedUMKM.harga_max.toLocaleString()}
                       </p>
                     </div>
 
                     <div>
                       <Label className="text-sm font-medium text-gray-700">Tanggal Daftar</Label>
-                      <p className="text-sm">{new Date(selectedUMKM.tanggalDaftar).toLocaleDateString("id-ID")}</p>
+                      <p className="text-sm">{new Date(selectedUMKM.created_at).toLocaleDateString("id-ID")}</p>
                     </div>
                   </div>
 

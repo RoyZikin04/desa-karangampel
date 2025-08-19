@@ -22,42 +22,45 @@ export default function BeritaPage() {
       try {
         // Ambil dari local-storage (kode lama)
         const localBerita = beritaStorage.getPublished();
-        
-        
+
         // Ambil dari Supabase
-        
         const { data, error } = await supabase
-        .from("berita")
-        .select("*")
-        .eq("status", "published")
-        .order("tanggal", { ascending: false });
+          .from("berita")
+          .select("*")
+          .eq("status", "published")
+          .order("tanggal", { ascending: false });
 
         if (error) {
           console.error("Gagal mengambil berita dari Supabase:", error);
           setBeritaList(localBerita); // fallback
           return;
         }
-        
-        // Tambahkan slug kalau tidak ada
+
+        // Buat set ID dari Supabase
+        const supabaseIds = new Set((data || []).map((item) => item.id));
+
+        // Filter localStorage biar tidak ada yang sudah dihapus di Supabase
+        const filteredLocal = localBerita.filter(
+          (item) => !supabaseIds.has(item.id)
+        );
+
+        // Tambahkan slug + normalisasi data Supabase
         const beritaWithSlug = (data || []).map((item) => ({
           ...item,
-          // normalisasi slug
           slug:
             item.slug ||
             `${item.judul
               .toLowerCase()
               .replace(/\s+/g, "-")
               .replace(/[^a-z0-9-]/g, "")}-${item.id}`,
-          // normalisasi URL gambar
           gambarUrl: item.gambarUrl || item.gambar_url || "",
-          // normalisasi field opsional
           ringkasan: item.ringkasan || "",
           konten: item.konten || item.isi || "",
         }));
 
+        // Gabungkan data Supabase + localStorage yang sudah difilter
+        const combined = [...beritaWithSlug, ...filteredLocal];
 
-        // Gabungkan keduanya (Supabase + Local)
-        const combined = [...beritaWithSlug, ...localBerita];
         setBeritaList(combined);
       } catch (err) {
         console.error("Error memuat berita:", err);
@@ -66,6 +69,7 @@ export default function BeritaPage() {
 
     fetchBerita();
   }, []);
+
 
 
   const getCategoryLabel = (category: string) => {

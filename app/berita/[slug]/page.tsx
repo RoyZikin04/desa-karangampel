@@ -16,25 +16,21 @@ export default function DetailBeritaPage() {
   const [berita, setBerita] = useState<Berita | null>(null)
   const [loading, setLoading] = useState(true)
 
-useEffect(() => {
-  const fetchBerita = async () => {
-    const slugParam = String(params.slug);
+  useEffect(() => {
+    const fetchBerita = async () => {
+      const slugParam = String(params.slug);
+      let found: Berita | null = null;
 
-    // 1) Cek local-storage (kode lama)
-    let found: Berita | null = beritaStorage.getBySlug(slugParam);
-
-    // 2) Kalau tidak ada di local, coba ke Supabase
-    if (!found) {
-      // a) coba by slug persis
+      // Coba cari di Supabase berdasarkan slug
       const { data: bySlug, error: errSlug } = await supabase
         .from("berita")
         .select("*")
         .eq("slug", slugParam)
-        .maybeSingle(); // biar gak error kalau 0 row
+        .maybeSingle();
 
       let row: any = bySlug;
 
-      // b) kalau belum ketemu, coba ekstrak id di akhir slug: ...-12345
+      // Kalau belum ketemu, coba ambil id dari slug: ...-123
       if (!row) {
         const tail = slugParam.split("-").pop();
         if (tail && /^\d+$/.test(tail)) {
@@ -48,7 +44,6 @@ useEffect(() => {
       }
 
       if (row) {
-        // 3) Normalisasi kolom dari Supabase -> shape Berita (camelCase)
         const normalized: Berita = {
           id: row.id,
           judul: row.judul,
@@ -63,17 +58,15 @@ useEffect(() => {
         };
         found = normalized;
       } else if (errSlug) {
-        // Kalau Supabase balikin error beneran (bukan sekadar 0 row)
         console.error("Supabase error:", errSlug);
       }
-    }
 
-    setBerita(found || null);
-    setLoading(false);
-  };
+      setBerita(found || null);
+      setLoading(false);
+    };
 
-  fetchBerita();
-}, [params.slug]);
+    fetchBerita();
+  }, [params.slug]);
 
 
   const getCategoryLabel = (category: string) => {

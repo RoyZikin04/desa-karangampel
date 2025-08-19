@@ -8,46 +8,42 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { umkmStorage, reviewStorage, initializeDemoData, type UMKM } from "@/lib/local-storage"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function UMKMPage() {
-  const [umkmList, setUmkmList] = useState<UMKM[]>([])
+  const [umkmList, setUmkmList] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [ratings, setRatings] = useState<{ [key: string]: { average: number; count: number } }>({})
 
   // Load data UMKM yang sudah disetujui
   useEffect(() => {
-    // Inisialisasi data demo jika belum ada
-    initializeDemoData()
+    const fetchUMKM = async () => {
+      const { data, error } = await supabase
+        .from("umkm")
+        .select("*")
+        .eq("status", "approved")   // hanya tampil yg disetujui admin
+        .order("created_at", { ascending: false })
 
-    const loadData = () => {
-      const approvedUMKM = umkmStorage.getApproved()
-      setUmkmList(approvedUMKM)
+      if (error) {
+        console.error("Gagal mengambil UMKM:", error)
+        return
+      }
 
-      const ratingsData: { [key: string]: { average: number; count: number } } = {}
-      approvedUMKM.forEach((umkm) => {
-        ratingsData[umkm.id] = reviewStorage.getAverageRating(umkm.id)
-      })
-      setRatings(ratingsData)
+      setUmkmList(data || [])
     }
 
-    loadData()
-
-    // Update data setiap 2 detik untuk menampilkan UMKM baru yang disetujui
-    const interval = setInterval(loadData, 2000)
-    return () => clearInterval(interval)
+    fetchUMKM()
   }, [])
 
   // Filter UMKM berdasarkan pencarian dan kategori
   const filteredUMKM = umkmList.filter((umkm) => {
     const matchesSearch =
-      umkm.namaUsaha.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      umkm.deskripsi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      umkm.produkUtama.toLowerCase().includes(searchTerm.toLowerCase())
+      umkm.nama_usaha?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      umkm.deskripsi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      umkm.produk_utama?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesCategory = categoryFilter === "all" || umkm.kategori === categoryFilter
-
     return matchesSearch && matchesCategory
   })
 
@@ -83,7 +79,6 @@ export default function UMKMPage() {
       {/* Header Section */}
       <section className="relative h-[300px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
         <div className="absolute inset-0 bg-black/40" />
-        {/* CATATAN: Ganti dengan foto UMKM atau pasar desa */}
         <Image src="/placeholder.svg?height=300&width=1200" alt="UMKM Desa" fill className="object-cover" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">UMKM Desa Karangampel</h1>
@@ -160,10 +155,9 @@ export default function UMKMPage() {
                 return (
                   <Card key={umkm.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="relative h-48">
-                      {/* CATATAN: Foto produk UMKM - menggunakan foto yang diupload */}
                       <Image
-                        src={umkm.fotoUrl || "/placeholder.svg?height=200&width=300"}
-                        alt={umkm.namaUsaha}
+                        src={umkm.foto_url || "/placeholder.svg?height=200&width=300"}
+                        alt={umkm.nama_usaha}
                         fill
                         className="object-cover"
                       />
@@ -172,7 +166,7 @@ export default function UMKMPage() {
                       </Badge>
                     </div>
                     <CardHeader>
-                      <CardTitle>{umkm.namaUsaha}</CardTitle>
+                      <CardTitle>{umkm.nama_usaha}</CardTitle>
                       <CardDescription className="flex items-center text-sm">
                         <MapPin className="h-4 w-4 mr-1" />
                         {umkm.alamat}
@@ -182,7 +176,7 @@ export default function UMKMPage() {
                       <p className="text-sm text-gray-600 mb-4 line-clamp-3">{umkm.deskripsi}</p>
                       <div className="mb-4">
                         <p className="text-xs text-gray-500 mb-1">Produk Utama:</p>
-                        <p className="text-sm font-medium">{umkm.produkUtama}</p>
+                        <p className="text-sm font-medium">{umkm.produk_utama}</p>
                       </div>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center">
@@ -194,7 +188,7 @@ export default function UMKMPage() {
                           </span>
                         </div>
                         <span className="text-sm text-gray-500">
-                          Rp {umkm.hargaMin.toLocaleString()} - {umkm.hargaMax.toLocaleString()}
+                          Rp {umkm.harga_min?.toLocaleString()} - {umkm.harga_max?.toLocaleString()}
                         </span>
                       </div>
                       <div className="flex gap-2">
@@ -213,28 +207,6 @@ export default function UMKMPage() {
               })}
             </div>
           )}
-
-          {/* Load More Button - hanya tampil jika ada banyak data */}
-          {filteredUMKM.length > 9 && (
-            <div className="text-center mt-12">
-              <Button size="lg" variant="outline">
-                Muat Lebih Banyak UMKM
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-16 bg-blue-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ingin Mendaftarkan UMKM Anda?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Bergabunglah dengan komunitas UMKM Desa Karangampel dan tingkatkan jangkauan bisnis Anda
-          </p>
-          <Button size="lg" variant="secondary" asChild>
-            <a href="/daftar-umkm">Daftar UMKM Sekarang</a>
-          </Button>
         </div>
       </section>
     </div>
