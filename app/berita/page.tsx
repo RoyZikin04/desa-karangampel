@@ -106,7 +106,7 @@ export default function BeritaPage() {
   return (
     <div className="min-h-screen">
       {/* Header Section */}
-      <section className="relative h-[300px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
+      <section className="relative h-[420px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
         <div className="absolute inset-0 bg-black/40" />
         {/* CATATAN: Ganti dengan foto kegiatan desa */}
         <Image src="/beritaacara.jpg?height=300&width=1200" alt="Kegiatan Desa" fill className="object-cover" />

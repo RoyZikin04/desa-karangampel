@@ -6,10 +6,10 @@ export default function TentangDesaPage() {
   return (
     <div className="min-h-screen">
       {/* Header Section */}
-      <section className="relative h-[400px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
+      <section className="relative h-[500px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
         <div className="absolute inset-0 bg-black/40" />
         {/* CATATAN: Ganti dengan foto pemandangan desa Anda */}
-        <Image src="/tentangdesa.jpg?height=400&width=1200" alt="Pemandangan Desa" fill className="object-cover" />
+        <Image src="/sejarah.jpg?height=300&width=1200" alt="Pemandangan Desa" fill className="object-cover" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Tentang Desa Karangampel</h1>
           <p className="text-xl">Mengenal lebih dekat sejarah, budaya, dan potensi desa kami</p>
@@ -26,8 +26,7 @@ export default function TentangDesaPage() {
               <div className="space-y-4 text-gray-600">
                 <p>
                   Desa Karangampel didirikan pada tahun 1945 oleh para pendiri yang memiliki visi untuk menciptakan komunitas
-                  yang sejahtera dan harmonis. Nama "Makmur" dipilih sebagai harapan agar desa ini selalu berkembang dan
-                  penduduknya hidup dalam kemakmuran.
+                  yang sejahtera dan harmonis. Nama "Karangampel" dipilih sebagai harapan agar desa ini .
                 </p>
                 <p>
                   Sejak awal berdirinya, desa ini dikenal sebagai penghasil produk pertanian berkualitas tinggi. Seiring
@@ -42,7 +41,7 @@ export default function TentangDesaPage() {
             </div>
             <div className="relative h-[400px] rounded-lg overflow-hidden">
               {/* CATATAN: Ganti dengan foto sejarah atau landmark desa Anda */}
-              <Image src="/placeholder.svg?height=400&width=600" alt="Sejarah Desa" fill className="object-cover" />
+              <Image src="/landmarkdesa.png?height=400&width=600" alt="Sejarah Desa" fill className="object-cover" />
             </div>
           </div>
         </div>

@@ -47,7 +47,7 @@ export default function HomePage() {
         {/* CATATAN: Ganti placeholder dengan foto panorama desa Anda */}
         <div className="absolute inset-0 bg-black/40" />
         <Image
-          src="/test.jpg?height=600&width=1200"
+          src="/KarangampelDesa.jpg?height=600&width=1200"
           alt="Pemandangan Desa"
           fill
           className="object-cover"

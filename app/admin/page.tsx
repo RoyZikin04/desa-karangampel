@@ -129,7 +129,7 @@ export default function AdminPage() {
                 </Button>
               </form>
 
-              <Alert className="mt-4">
+              {/* <Alert className="mt-4">
                 <AlertDescription className="text-sm">
                   <strong>Demo Login:</strong>
                   <br />
@@ -139,7 +139,7 @@ export default function AdminPage() {
                   <br />
                   <em className="text-red-600">⚠️ WAJIB diganti untuk keamanan!</em>
                 </AlertDescription>
-              </Alert>
+              </Alert> */}
             </CardContent>
           </Card>
         </div>

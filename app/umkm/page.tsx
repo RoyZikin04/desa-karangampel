@@ -77,9 +77,9 @@ export default function UMKMPage() {
   return (
     <div className="min-h-screen">
       {/* Header Section */}
-      <section className="relative h-[300px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
+      <section className="relative h-[450px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
         <div className="absolute inset-0 bg-black/40" />
-        <Image src="/placeholder.svg?height=300&width=1200" alt="UMKM Desa" fill className="object-cover" />
+        <Image src="/umkm.jpg?height=300&width=1200" alt="UMKM Desa" fill className="object-cover" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">UMKM Desa Karangampel</h1>
           <p className="text-xl">Temukan produk berkualitas dari usaha mikro, kecil, dan menengah lokal</p>

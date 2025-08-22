@@ -114,10 +114,10 @@ export default function DaftarUMKMPage() {
   return (
     <div className="min-h-screen">
       {/* Header Section */}
-      <section className="relative h-[300px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
+      <section className="relative h-[600px] flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600">
         <div className="absolute inset-0 bg-black/40" />
         {/* CATATAN: Ganti dengan foto UMKM atau kegiatan ekonomi desa */}
-        <Image src="/placeholder.svg?height=300&width=1200" alt="Daftar UMKM" fill className="object-cover" />
+        <Image src="/daftarumkm.jpg?height=300&width=1200" alt="Daftar UMKM" fill className="object-cover" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Daftarkan UMKM Anda</h1>
           <p className="text-xl">Bergabunglah dengan komunitas UMKM Desa Karangampel dan kembangkan bisnis Anda</p>
