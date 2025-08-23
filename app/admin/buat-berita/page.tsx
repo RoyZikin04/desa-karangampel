@@ -56,7 +56,8 @@ export default function BuatBeritaPage() {
         gambarUrl = data.publicUrl;
       }
 
-      await tambahBerita({
+    const { error } = await supabase.from("berita").insert([
+      {
         judul: formData.judul,
         kategori: formData.kategori,
         ringkasan: formData.ringkasan,
@@ -65,7 +66,10 @@ export default function BuatBeritaPage() {
         tanggal: formData.tanggal,
         status: formData.status,
         gambar_url: gambarUrl,
-      });
+      },
+    ]);
+
+    if (error) throw error;
 
       setSubmitSuccess(true);
       setTimeout(() => router.push("/admin"), 2000);

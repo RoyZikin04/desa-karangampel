@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabaseClient"
 import { GoogleMaps } from "@/components/google-maps"
 import { ReviewSystem } from "@/components/review-system"
 
+
 export default function DetailUMKMPage() {
   const params = useParams()
   const router = useRouter()

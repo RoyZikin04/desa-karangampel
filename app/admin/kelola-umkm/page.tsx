@@ -301,7 +301,7 @@ export default function KelolaUMKMPage() {
 
                     <div>
                       <Label className="text-sm font-medium text-gray-700">Produk Utama</Label>
-                      <p className="text-sm">{selectedUMKM.produkUtama}</p>
+                      <p className="text-sm">{selectedUMKM.produk_utama}</p>
                     </div>
 
                     <div>

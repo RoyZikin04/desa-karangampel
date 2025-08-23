@@ -13,111 +13,77 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Import fungsi penyimpanan lokal
-import { beritaStorage, type Berita } from "@/lib/local-storage"
+  type BeritaRow = {
+    id: number
+    judul: string | null
+    penulis: string | null
+    kategori: string | null
+    ringkasan: string | null
+    konten: string | null
+    tanggal: string | null
+    status: "draft" | "published" | "scheduled" | null
+  }
 
 export default function KelolaBeritaPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [beritaList, setBeritaList] = useState<Berita[]>([])
-  const [deleteAlert, setDeleteAlert] = useState<string | null>(null)
-  const [previewBerita, setPreviewBerita] = useState<Berita | null>(null)
+  const [statusFilter, setStatusFilter] = useState("all") 
+  const [beritaList, setBeritaList] = useState<BeritaRow[]>([])
+  const [deleteAlert, setDeleteAlert] = useState<number | null>(null)
+  const [previewBerita, setPreviewBerita] = useState<BeritaRow | null>(null)
   const [showUpcoming, setShowUpcoming] = useState(false)
 
-  // Load data dari localStorage
+
   useEffect(() => {
-    const fetchData = async () => {
-      // Ambil dari Supabase
-      const { data: supaData, error } = await supabase
+    const fetchBerita = async () => {
+      const { data, error } = await supabase
         .from("berita")
         .select("*")
         .order("tanggal", { ascending: false });
 
       if (error) {
-        console.error("Gagal mengambil berita:", error);
-        return;
+        console.error("Gagal ambil berita:", error.message);
+      } else {
+        setBeritaList(data || []);
       }
-
-      // Ambil dari localStorage
-      const localData = beritaStorage.getAll();
-
-      // Buang berita dari localStorage yang SUDAH ada di Supabase
-      // (supaya tidak double / muncul lagi setelah dihapus)
-      const filteredLocal = localData.filter(
-        localItem => !supaData.some(supaItem => supaItem.id === localItem.id)
-      );
-
-      // Gabungkan hasil (Supabase + sisa lokal)
-      const mergedData = [...supaData, ...filteredLocal];
-
-      setBeritaList(mergedData);
     };
 
-    fetchData();
+    fetchBerita();
   }, []);
 
-
   // Fungsi hapus berita
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await fetch("/api/delete-berita", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
+  const handleDelete = async (id: number) => {
+    console.log("Coba hapus id:", id)
 
-      const result = await res.json();
-
-      if (result.error) {
-        console.error("Gagal menghapus berita:", result.error);
-        alert("Gagal menghapus berita: " + result.error);
-        return;
-      }
-
-      // Hapus juga dari localStorage
-      beritaStorage.delete(id);
-
-      // Update state supaya langsung hilang
-      setBeritaList((prev) => prev.filter((b) => b.id !== id));
-      setDeleteAlert(null);
-
-      alert("Berita berhasil dihapus!");
-    } catch (err: any) {
-      console.error("Error:", err.message);
-      alert("Terjadi kesalahan saat menghapus berita");
-    }
-  };
-
-
-  // Fungsi untuk mengubah status berita
-  const handleStatusChange = async (
-    id: string,
-    newStatus: "draft" | "published" | "scheduled"
-  ) => {
-    // Coba update ke Supabase dulu
     const { data, error } = await supabase
       .from("berita")
-      .update({ status: newStatus })
+      .delete()
       .eq("id", id)
       .select()
-      .single();
 
     if (error) {
-      // Jika gagal (mis. item hanya ada di localStorage), lanjutkan update lokal
-      console.warn("Gagal update status di Supabase, lanjut lokal:", error.message);
+      console.error("Gagal hapus berita:", error.message)
+      return
     }
 
-    // Selalu update localStorage (untuk item lokal/offline)
-    beritaStorage.update(id, { status: newStatus });
+    console.log("Berhasil hapus:", data)
 
-    // Update state React tanpa menghancurkan hasil merge Supabase+lokal
-    setBeritaList((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
-    );
+    setBeritaList((prev) => prev.filter((b) => b.id !== id))
+    setDeleteAlert(null)
+  }
 
-    // Segarkan Server Components (menu/sidebar)
-    router.refresh();
-  };
+
+
+  const handleStatusChange = async (
+    id: number,
+    newStatus: "draft" | "published" | "scheduled"
+  ) => {
+    const { error } = await supabase.from("berita").update({ status: newStatus }).eq("id", id)
+    if (error) console.error("Gagal update status:", error.message)
+
+    setBeritaList((prev) => prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b)))
+  }
+
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -144,8 +110,9 @@ export default function KelolaBeritaPage() {
     }
   }
 
-  const getCategoryLabel = (category: string) => {
-    const labels: { [key: string]: string } = {
+  const getCategoryLabel = (category: string | null) => {
+    if (!category) return "-"
+    const labels: Record<string, string> = {
       acara: "Acara",
       pembangunan: "Pembangunan",
       umkm: "UMKM",
@@ -158,13 +125,16 @@ export default function KelolaBeritaPage() {
     return labels[category] || category
   }
 
+
   const filteredBerita = beritaList.filter((berita) => {
-    const matchesSearch =
-      berita.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      berita.penulis.toLowerCase().includes(searchTerm.toLowerCase())
+    const judul = (berita.judul ?? "").toLowerCase()
+    const penulis = (berita.penulis ?? "").toLowerCase()
+    const matchesSearch = judul.includes(searchTerm.toLowerCase()) || penulis.includes(searchTerm.toLowerCase())
+
     const matchesStatus = statusFilter === "all" || berita.status === statusFilter
-    const isUpcoming = new Date(berita.tanggal) > new Date()
+    const isUpcoming = berita.tanggal ? new Date(berita.tanggal) > new Date() : false
     const matchesUpcoming = !showUpcoming || isUpcoming
+
     return matchesSearch && matchesStatus && matchesUpcoming
   })
 
@@ -193,15 +163,21 @@ export default function KelolaBeritaPage() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Delete Alert */}
-        {deleteAlert && (
+        {deleteAlert !== null && (
           <Alert className="mb-8 border-red-200 bg-red-50">
             <AlertDescription className="text-red-800">
               <div className="flex items-center justify-between">
                 <span>Yakin ingin menghapus berita ini? Tindakan ini tidak dapat dibatalkan.</span>
                 <div className="flex gap-2 ml-4">
-                  <Button size="sm" variant="destructive" onClick={() => handleDelete(deleteAlert)}>
-                    Hapus
-                  </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteAlert !== null && handleDelete(deleteAlert)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Hapus
+                    </Button>
+
                   <Button size="sm" variant="outline" onClick={() => setDeleteAlert(null)}>
                     Batal
                   </Button>
@@ -210,6 +186,7 @@ export default function KelolaBeritaPage() {
             </AlertDescription>
           </Alert>
         )}
+
 
         {/* Search and Filter */}
         <Card className="mb-8">
@@ -247,7 +224,7 @@ export default function KelolaBeritaPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      {getStatusBadge(berita.status)}
+                      {getStatusBadge(berita.status ?? "draft")}
                       <Badge variant="outline" className="text-xs">
                         {getCategoryLabel(berita.kategori)}
                       </Badge>
@@ -257,7 +234,7 @@ export default function KelolaBeritaPage() {
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {new Date(berita.tanggal).toLocaleDateString("id-ID")}
+                        {berita.tanggal ? new Date(berita.tanggal).toLocaleDateString("id-ID") : "-"}
                       </span>
                       <span className="flex items-center">
                         <User className="h-4 w-4 mr-1" />
@@ -279,12 +256,12 @@ export default function KelolaBeritaPage() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Select
-                      value={berita.status}
-                      onValueChange={(value: "draft" | "published" | "scheduled") =>
-                        handleStatusChange(berita.id, value)
-                      }
-                    >
+                      <Select
+                        value={berita.status ?? "draft"}
+                        onValueChange={(value: "draft" | "published" | "scheduled") =>
+                          handleStatusChange(berita.id, value)
+                        }
+                      >
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -356,36 +333,37 @@ export default function KelolaBeritaPage() {
           {previewBerita && (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                {getStatusBadge(previewBerita.status)}
+                {getStatusBadge(previewBerita.status ?? "draft")}
                 <Badge variant="outline">{getCategoryLabel(previewBerita.kategori)}</Badge>
               </div>
-              <h1 className="text-2xl font-bold">{previewBerita.judul}</h1>
+              <h1 className="text-2xl font-bold">{previewBerita.judul ?? "-"}</h1>
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <span className="flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
-                  {new Date(previewBerita.tanggal).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {previewBerita.tanggal
+                    ? new Date(previewBerita.tanggal).toLocaleDateString("id-ID", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "-"}
                 </span>
                 <span className="flex items-center">
                   <User className="h-4 w-4 mr-1" />
-                  {previewBerita.penulis}
+                  {previewBerita.penulis ?? "-"}
                 </span>
               </div>
               <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
-                <p className="text-gray-700">{previewBerita.ringkasan}</p>
+                <p className="text-gray-700">{previewBerita.ringkasan ?? "-"}</p>
               </div>
               <div className="prose max-w-none">
-                {previewBerita.konten.split("\n").map((paragraph, index) => (
-                  <p
-                    key={`${previewBerita.id}-paragraph-${index}-${paragraph.slice(0, 10).replace(/\s/g, "")}`}
-                    className="mb-4"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                {(previewBerita.konten ?? "")
+                  .split("\n")
+                  .map((paragraph, index) => (
+                    <p key={`${previewBerita.id}-p-${index}`} className="mb-4">
+                      {paragraph}
+                    </p>
+                  ))}
               </div>
             </div>
           )}
