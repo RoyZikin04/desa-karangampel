@@ -86,22 +86,22 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="h-5 w-5 text-gray-300 mt-1 flex-shrink-0" />
                 <span className="text-gray-300 text-sm">
-                  Jl. Raya Desa No. 123
+                    Jl. Raya Karangampel No. 123
                   <br />
-                  Kecamatan Makmur
+                    Desa Karangampel, Kecamatan Karangampel
                   <br />
-                  Kabupaten Sejahtera 12345
+                   Kabupaten Indramayu, Jawa Barat 45283
                 </span>
               </div>
               {/* CATATAN: Ganti dengan nomor telepon desa Anda */}
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-gray-300" />
-                <span className="text-gray-300 text-sm">(021) 1234-5678</span>
+                <span className="text-gray-300 text-sm">(+62) 813-2202-7798</span>
               </div>
               {/* CATATAN: Ganti dengan email desa Anda */}
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-gray-300" />
-                <span className="text-gray-300 text-sm">info@desamakmur.id</span>
+                <span className="text-gray-300 text-sm">karpelsehati18@gmail.com</span>
               </div>
             </div>
           </div>

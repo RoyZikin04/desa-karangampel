@@ -142,11 +142,8 @@
                       <div className="grid grid-cols-1 lg:grid-cols-2">
                         <div className="relative h-64 lg:h-auto">
                           <Image
-                            src={
-                              featuredBerita.gambarUrl ||
-                              "/placeholder.svg?height=400&width=600&query=news featured image"
-                            }
-                            alt={featuredBerita.judul}
+                            src={featuredBerita.gambarUrl || "/placeholder.svg?height=400&width=600&query=news featured image"}
+                            alt={featuredBerita.judul || "Gambar berita"}
                             fill
                             className="object-cover"
                             onError={(e) => {

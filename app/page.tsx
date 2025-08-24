@@ -5,39 +5,78 @@ import Link from "next/link"
 import { ArrowRight, MapPin, Users, Building2, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-// Import fungsi untuk inisialisasi data demo
-import { initializeDemoData, umkmStorage, beritaStorage } from "@/lib/local-storage"
 import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function HomePage() {
   // Tambahkan state untuk data dinamis
-  const [umkmCount, setUmkmCount] = useState(45)
-  const [beritaCount, setBeritaCount] = useState(12)
+  const [umkmCount, setUmkmCount] = useState(0)
+  const [beritaCount, setBeritaCount] = useState(0)
   const [featuredUMKM, setFeaturedUMKM] = useState<any[]>([])
   const [latestBerita, setLatestBerita] = useState<any[]>([])
 
-  // Load data real dari localStorage
   useEffect(() => {
-    // Inisialisasi data demo
-    initializeDemoData()
+    const loadData = async () => {
+      try {
+        // 🔹 Fetch UMKM
+        const { data: umkmData, error: umkmError } = await supabase
+          .from("umkm")
+          .select("*")
+          .eq("status", "approved")
+          .order("created_at", { ascending: false })
 
-    const loadData = () => {
-      const approvedUMKM = umkmStorage.getApproved()
-      const publishedBerita = beritaStorage.getPublished()
+        if (umkmError) throw umkmError
 
-      setUmkmCount(approvedUMKM.length)
-      setBeritaCount(publishedBerita.length)
+        const umkmWithUrl = (umkmData || []).map((u) => {
+          let fotoUrl = u.foto_url
 
-      setFeaturedUMKM(approvedUMKM.slice(0, 3))
-      setLatestBerita(publishedBerita.slice(0, 3))
+          // Kalau foto_url hanya nama file, generate public URL
+          if (fotoUrl && !fotoUrl.startsWith("http")) {
+            const { data } = supabase.storage.from("umkm").getPublicUrl(fotoUrl)
+            fotoUrl = data?.publicUrl || ""
+          }
+
+          return {
+            ...u,
+            nama_usaha: u.nama_usaha ?? "",
+            kategori: u.kategori ?? "",
+            deskripsi: u.deskripsi ?? "",
+            foto_url: fotoUrl, // ✅ perbaiki di sini
+          }
+        })
+        setFeaturedUMKM(umkmWithUrl.slice(0, 3))
+        setUmkmCount(umkmWithUrl.length)
+
+        if (umkmError) throw umkmError
+        setFeaturedUMKM(umkmData?.slice(0, 3) || [])
+        
+
+        // 🔹 Fetch Berita
+        const { data: beritaData, error: beritaError } = await supabase
+          .from("berita")
+          .select("*")
+          .eq("status", "published")
+          .order("tanggal", { ascending: false })
+
+        if (beritaError) throw beritaError
+
+        // 🔹 Fetch UMKM
+
+        const beritaWithSlug = (beritaData || []).map((item) => ({
+          ...item,
+          slug:
+            (item as any).slug ||
+            `${item.judul.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}-${item.id}`,
+          gambarUrl: (item as any).gambarUrl || item.gambar_url || "",
+        }))
+
+        setLatestBerita(beritaWithSlug.slice(0, 3))
+      } catch (err) {
+        console.error("Gagal memuat data:", err)
+      }
     }
 
     loadData()
-
-    // Update counts setiap 2 detik
-    const interval = setInterval(loadData, 2000)
-    return () => clearInterval(interval)
   }, [])
 
   return (
@@ -131,19 +170,15 @@ export default function HomePage() {
                 <Card key={umkm.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="relative h-48">
                     <Image
-                      src={umkm.fotoProduk || "/placeholder.svg?height=200&width=300&query=UMKM product"}
-                      alt={umkm.namaUsaha}
+                      src={umkm.foto_url || "/placeholder.svg?height=200&width=300&query=UMKM product"}
+                      alt={umkm.nama_usaha?.trim() || "Foto produk UMKM"}
                       fill
                       className="object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.src = "/placeholder.svg?height=200&width=300"
-                      }}
                     />
                   </div>
                   <CardHeader>
-                    <CardTitle>{umkm.namaUsaha}</CardTitle>
-                    <CardDescription>{umkm.jenisUsaha}</CardDescription>
+                    <CardTitle>{umkm.nama_usaha}</CardTitle>
+                    <CardDescription>{umkm.jenis_usaha}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-gray-600 mb-4 line-clamp-3">{umkm.deskripsi}</p>
