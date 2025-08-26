@@ -15,6 +15,7 @@ export default function DetailBeritaPage() {
   const router = useRouter()
   const [berita, setBerita] = useState<Berita | null>(null)
   const [loading, setLoading] = useState(true)
+  const [relatedBerita, setRelatedBerita] = useState<Berita[]>([])
 
   useEffect(() => {
     const fetchBerita = async () => {
@@ -43,23 +44,52 @@ export default function DetailBeritaPage() {
         }
       }
 
-      if (row) {
-        const normalized: Berita = {
-          id: row.id,
-          judul: row.judul,
-          kategori: row.kategori,
-          ringkasan: row.ringkasan ?? "",
-          gambarUrl: row.gambar_url ?? row.gambarUrl ?? "",
-          slug: row.slug ?? slugParam,
-          tanggal: row.tanggal ?? new Date().toISOString(),
-          penulis: row.penulis ?? "Admin Desa",
-          konten: row.konten ?? row.isi ?? row.content ?? "",
-          status: row.status ?? "published",
-        };
-        found = normalized;
-      } else if (errSlug) {
-        console.error("Supabase error:", errSlug);
+if (row) {
+  const normalized: Berita = {
+    id: row.id,
+    judul: row.judul,
+    kategori: row.kategori,
+    ringkasan: row.ringkasan ?? "",
+    gambarUrl: row.gambar_url ?? row.gambarUrl ?? "",
+    slug: row.slug ?? slugParam,
+    tanggal: row.tanggal ?? new Date().toISOString(),
+    penulis: row.penulis ?? "Admin Desa",
+    konten: row.konten ?? row.isi ?? row.content ?? "",
+    status: row.status ?? "published",
+  };
+  found = normalized;
+
+  // 🔹 Ambil berita terkait dari Supabase
+  const { data: relatedData, error: relatedError } = await supabase
+    .from("berita")
+    .select("*")
+    .eq("kategori", normalized.kategori)
+    .neq("id", normalized.id)
+    .eq("status", "published")
+    .order("tanggal", { ascending: false })
+    .limit(2);
+
+      if (!relatedError && relatedData) {
+        const relatedNormalized = relatedData.map((r) => ({
+          id: r.id,
+          judul: r.judul,
+          kategori: r.kategori,
+          ringkasan: r.ringkasan ?? "",
+          gambarUrl: r.gambar_url ?? r.gambarUrl ?? "",
+          slug:
+            r.slug ??
+            `${r.judul.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}-${r.id}`,
+          tanggal: r.tanggal,
+          penulis: r.penulis ?? "Admin Desa",
+          konten: r.konten ?? "",
+          status: r.status ?? "published",
+        }));
+        setRelatedBerita(relatedNormalized);
       }
+    } else if (errSlug) {
+      console.error("Supabase error:", errSlug);
+    }
+
 
       setBerita(found || null);
       setLoading(false);
@@ -220,36 +250,36 @@ export default function DetailBeritaPage() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Berita Terkait</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {beritaStorage
-              .getPublished()
-              .filter((b) => b.id !== berita.id && b.kategori === berita.kategori)
-              .slice(0, 2)
-              .map((relatedBerita) => (
-                <Card key={relatedBerita.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+            {relatedBerita.length > 0 ? (
+              relatedBerita.map((related) => (
+                <Card key={related.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="relative h-32">
                     <Image
-                      src={relatedBerita.gambarUrl || "/placeholder.svg?height=128&width=300&query=related news"}
-                      alt={relatedBerita.judul}
+                      src={related.gambarUrl || "/placeholder.svg?height=128&width=300&query=related news"}
+                      alt={related.judul}
                       fill
                       className="object-cover rounded-t-lg"
                       onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.src = "/placeholder.svg?height=128&width=300"
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg?height=128&width=300";
                       }}
                     />
                   </div>
                   <CardContent className="p-4">
-                    <Badge className={`${getCategoryColor(relatedBerita.kategori)} mb-2`}>
-                      {getCategoryLabel(relatedBerita.kategori)}
+                    <Badge className={`${getCategoryColor(related.kategori)} mb-2`}>
+                      {getCategoryLabel(related.kategori)}
                     </Badge>
-                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{relatedBerita.judul}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{relatedBerita.ringkasan}</p>
+                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{related.judul}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{related.ringkasan}</p>
                     <Button variant="outline" size="sm" asChild>
-                      <a href={`/berita/${relatedBerita.slug}`}>Baca Selengkapnya</a>
+                      <a href={`/berita/${related.slug}`}>Baca Selengkapnya</a>
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+            ) : (
+              <p className="text-gray-500">Belum ada berita terkait.</p>
+            )}
           </div>
         </div>
       </div>

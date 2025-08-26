@@ -18,7 +18,6 @@ import { ImageUpload } from "@/components/image-upload"
 import { tambahBerita } from "@/lib/database"
 import { supabase } from "@/lib/supabaseClient";
 
-
 export default function BuatBeritaPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,6 +32,8 @@ export default function BuatBeritaPage() {
     status: "draft",
     gambarUrl: "",
   })
+
+  
 
   // Update fungsi handleSubmit untuk menyimpan berita ke localStorage
   const handleSubmit = async (e: React.FormEvent) => {

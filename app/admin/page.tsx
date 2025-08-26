@@ -10,11 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { dashboardStats } from "@/lib/local-storage"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [session, setSession] = useState<any>(null)
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
@@ -29,42 +31,102 @@ export default function AdminPage() {
   const [recentActivities, setRecentActivities] = useState<any[]>([])
 
   useEffect(() => {
-    if (isLoggedIn) {
-      const loadStats = () => {
-        const currentStats = dashboardStats.getAllStats()
-        setStats({
-          totalUMKM: currentStats.totalUMKM,
-          totalBerita: currentStats.totalBerita,
-          pendingUMKM: currentStats.pendingUMKM,
-          monthlyVisitors: currentStats.monthlyVisitors,
-        })
-        setRecentActivities(dashboardStats.getRecentActivities())
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setSession(session)
+      } else {
+        setSession(null)
       }
-
-      loadStats()
-      const interval = setInterval(loadStats, 3000) // Update every 3 seconds
-      return () => clearInterval(interval)
+      setLoading(false)
     }
-  }, [isLoggedIn])
 
-  const handleLogin = (e: React.FormEvent) => {
+    getSession()
+
+    // Supabase listener kalau session berubah
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    if (!session) return;
+
+    const fetchStats = async () => {
+      try {
+        // Hitung Total UMKM
+        const { count: totalUMKM } = await supabase
+          .from("umkm")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "approved");
+
+        // Hitung Total Berita
+        const { count: totalBerita } = await supabase
+          .from("berita")
+          .select("*", { count: "exact", head: true });
+
+        // Hitung Pending UMKM
+        const { count: pendingUMKM } = await supabase
+          .from("umkm")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending");
+
+        // Simpan kunjungan baru
+        await supabase.from("visitors").insert({});
+
+        // Hitung pengunjung bulan ini
+        const awalBulan = new Date();
+        awalBulan.setDate(1);
+        awalBulan.setHours(0, 0, 0, 0);
+
+        const { count: monthlyVisitors } = await supabase
+          .from("visitors")
+          .select("*", { count: "exact", head: true })
+          .gte("visited_at", awalBulan.toISOString());
+
+        setStats({
+          totalUMKM: totalUMKM || 0,
+          totalBerita: totalBerita || 0,
+          pendingUMKM: pendingUMKM || 0,
+          monthlyVisitors: monthlyVisitors || 0,
+        });
+      } catch (err) {
+        console.error("Gagal ambil statistik:", err);
+      }
+    };
+
+    fetchStats();
+  }, [session]);
+
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // CATATAN: Username dan password default - WAJIB DIGANTI untuk keamanan
-    if (loginData.username === "admin" && loginData.password === "admin123") {
-      setIsLoggedIn(true)
-      setLoginError("")
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: loginData.username,
+      password: loginData.password,
+    })
+
+    if (error) {
+      setLoginError(error.message)
     } else {
-      setLoginError("Username atau password salah!")
+      setLoginError("")
+      setSession(data.session) // ✅ otomatis tersimpan di supabase-js
     }
   }
 
-  const handleLogout = () => {
-    setIsLoggedIn(false)
-    setLoginData({ username: "", password: "" })
-  }
 
-  if (!isLoggedIn) {
+
+const handleLogout = async () => {
+  await supabase.auth.signOut()
+  setSession(null)
+}
+
+
+if (loading) return <p>Loading...</p>
+  if (!session) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">

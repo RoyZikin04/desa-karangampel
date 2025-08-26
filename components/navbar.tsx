@@ -48,6 +48,9 @@ export default function Navbar() {
             <Link href="/daftar-umkm" className="text-gray-700 hover:text-blue-600 transition-colors">
               Daftar UMKM
             </Link>
+            <Link href="https://pengaduan-desa-karangampel.vercel.app" className="text-gray-700 hover:text-blue-600 transition-colors">
+              Pengaduan
+            </Link>
             <Link href="/admin" className="text-gray-700 hover:text-blue-600 transition-colors">
               Admin
             </Link>

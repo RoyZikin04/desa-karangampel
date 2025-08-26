@@ -25,17 +25,15 @@ export default function TentangDesaPage() {
               {/* CATATAN: Ganti dengan sejarah desa Anda */}
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Desa Karangampel didirikan pada tahun 1945 oleh para pendiri yang memiliki visi untuk menciptakan komunitas
-                  yang sejahtera dan harmonis. Nama "Karangampel" dipilih sebagai harapan agar desa ini .
+                  Nama Karangampel berawal dari kisah dakwah Kyai Syeh Syarif Hidayatullah di wilayah Indramayu. 
+                  Kepada Ki Buyut Banyu (Ki Balai Kambang) beliau memberikan 
+                  tetakan/tongkat bambu kuning (Pring Ampel) yang kemudian “tumbuh”, dan disepakati 
+                  masyarakat sebagai nama desa: Karangampel tanah/daerah yang ditanami Pring Ampel 
                 </p>
                 <p>
-                  Sejak awal berdirinya, desa ini dikenal sebagai penghasil produk pertanian berkualitas tinggi. Seiring
-                  berjalannya waktu, masyarakat mulai mengembangkan berbagai usaha kecil dan menengah yang kini menjadi
-                  tulang punggung ekonomi desa.
-                </p>
-                <p>
-                  Pada tahun 2010, Desa Karangampel mulai fokus pada pengembangan UMKM dan pariwisata berbasis komunitas,
-                  yang berhasil meningkatkan kesejahteraan masyarakat secara signifikan.
+                  Pada 1884 wilayah Karangampel dimekarkan menjadi dua desa Karangampel (utara jalan provinsi) dan Karangampel Kidul 
+                  (selatan) karena wilayahnya terlalu luas dan penduduk saat itu sekitar 14.000 jiwa. 
+                  Kepemimpinan desa tercatat beruntun hingga sekarang; Kepala Desa Mamat Rodiyatul Anwar menjabat sejak 2018.
                 </p>
               </div>
             </div>
@@ -62,8 +60,8 @@ export default function TentangDesaPage() {
               <CardContent>
                 {/* CATATAN: Ganti dengan visi desa Anda */}
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  "Menjadi desa mandiri, sejahtera, dan berkelanjutan yang berbasis pada pemberdayaan masyarakat dan
-                  pengembangan ekonomi lokal melalui UMKM yang inovatif."
+                  "Desa Karangampel mandiri, sejahtera, dan berkelanjutan berbasis pertanian produktif, UMKM, 
+                  layanan publik yang kuat, serta pelestarian budaya."
                 </p>
               </CardContent>
             </Card>
@@ -77,19 +75,19 @@ export default function TentangDesaPage() {
                 <ul className="space-y-3 text-gray-600">
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-green-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    Memberdayakan masyarakat melalui pengembangan UMKM yang berkelanjutan
+                    Memberdayakan masyarakat melalui pengembangan UMKM yang berkelanjutan dan inovatif (akses modal, pendampingan, digitalisasi, kemitraan).
                   </li>
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-green-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    Meningkatkan kualitas sumber daya manusia melalui pendidikan dan pelatihan
+                    Meningkatkan kualitas sumber daya manusia lewat pendidikan dan pelatihan (literasi digital, kewirausahaan, pertanian modern, vocational).
                   </li>
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-green-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    Melestarikan budaya lokal dan lingkungan hidup
+                    Melestarikan budaya lokal dan lingkungan hidup (agenda budaya, pengelolaan sampah, ruang hijau, konservasi air).
                   </li>
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-green-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    Membangun infrastruktur yang mendukung pertumbuhan ekonomi
+                    Membangun infrastruktur pendukung ekonomi (jalan/gang, pasar desa, irigasi, sanitasi, internet cepat).
                   </li>
                 </ul>
               </CardContent>
@@ -171,7 +169,7 @@ export default function TentangDesaPage() {
                     className="object-cover rounded-full"
                   />
                 </div>
-                <CardTitle>Bapak Suharto</CardTitle>
+                <CardTitle>Bapak Mamat</CardTitle>
                 <CardDescription>Kepala Desa</CardDescription>
               </CardHeader>
             </Card>
@@ -187,7 +185,7 @@ export default function TentangDesaPage() {
                     className="object-cover rounded-full"
                   />
                 </div>
-                <CardTitle>Ibu Siti Aminah</CardTitle>
+                <CardTitle>Bapak Deni Ulis</CardTitle>
                 <CardDescription>Sekretaris Desa</CardDescription>
               </CardHeader>
             </Card>
@@ -203,7 +201,7 @@ export default function TentangDesaPage() {
                     className="object-cover rounded-full"
                   />
                 </div>
-                <CardTitle>Bapak Ahmad Yani</CardTitle>
+                <CardTitle>Bapak Yoyo</CardTitle>
                 <CardDescription>Bendahara Desa</CardDescription>
               </CardHeader>
             </Card>

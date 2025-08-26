@@ -16,25 +16,56 @@ export default function UMKMPage() {
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [ratings, setRatings] = useState<{ [key: string]: { average: number; count: number } }>({})
 
-  // Load data UMKM yang sudah disetujui
-  useEffect(() => {
-    const fetchUMKM = async () => {
-      const { data, error } = await supabase
-        .from("umkm")
-        .select("*")
-        .eq("status", "approved")   // hanya tampil yg disetujui admin
-        .order("created_at", { ascending: false })
+    useEffect(() => {
+      const fetchUMKM = async () => {
+        // 🔹 Ambil UMKM
+        const { data: umkmData, error: umkmError } = await supabase
+          .from("umkm")
+          .select("*")
+          .eq("status", "approved")
+          .order("created_at", { ascending: false })
 
-      if (error) {
-        console.error("Gagal mengambil UMKM:", error)
-        return
+        if (umkmError) {
+          console.error("Gagal mengambil UMKM:", umkmError)
+          return
+        }
+
+        setUmkmList(umkmData || [])
+
+        // 🔹 Ambil ulasan (asumsinya tabel bernama "ulasan_umkm")
+        const { data: reviewData, error: reviewError } = await supabase
+          .from("ulasan_umkm")
+          .select("umkm_id, rating")
+
+        if (reviewError) {
+          console.error("Gagal mengambil ulasan:", reviewError)
+          return
+        }
+
+        // 🔹 Hitung rata-rata rating per UMKM
+        const ratingMap: { [key: string]: { average: number; count: number } } = {}
+        if (reviewData) {
+          reviewData.forEach((r) => {
+            if (!ratingMap[r.umkm_id]) {
+              ratingMap[r.umkm_id] = { average: 0, count: 0 }
+            }
+            ratingMap[r.umkm_id].average += r.rating
+            ratingMap[r.umkm_id].count += 1
+          })
+
+          Object.keys(ratingMap).forEach((id) => {
+            ratingMap[id].average = parseFloat(
+              (ratingMap[id].average / ratingMap[id].count).toFixed(1)
+            )
+          })
+        }
+
+        setRatings(ratingMap)
       }
 
-      setUmkmList(data || [])
-    }
+      fetchUMKM()
+    }, [])
 
-    fetchUMKM()
-  }, [])
 
   // Filter UMKM berdasarkan pencarian dan kategori
   const filteredUMKM = umkmList.filter((umkm) => {
@@ -151,7 +182,6 @@ export default function UMKMPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredUMKM.map((umkm) => {
                 const rating = ratings[umkm.id] || { average: 0, count: 0 }
-
                 return (
                   <Card key={umkm.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="relative h-48">

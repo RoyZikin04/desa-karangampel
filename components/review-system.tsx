@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabaseClient"
 import { Star, User, MessageCircle, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,13 +13,15 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface Review {
-  id: string
-  umkmId: string
-  nama: string
+  id: number
+  umkm_id: number
+  user_id: string | null
   rating: number
   komentar: string
-  tanggal: string
+  created_at: string
+  profiles?: { full_name: string } // kalau nanti join ke tabel profil
 }
+
 
 interface ReviewSystemProps {
   umkmId: string
@@ -30,57 +33,59 @@ export function ReviewSystem({ umkmId, umkmName }: ReviewSystemProps) {
   const [showForm, setShowForm] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [formData, setFormData] = useState({
-    nama: "",
     rating: 0,
     komentar: "",
   })
 
+
   // Load reviews from localStorage
   useEffect(() => {
-    const loadReviews = () => {
-      if (typeof window === "undefined") return
-      const data = localStorage.getItem("umkm-reviews")
-      const allReviews: Review[] = data ? JSON.parse(data) : []
-      const umkmReviews = allReviews.filter((review) => review.umkmId === umkmId)
-      setReviews(umkmReviews)
+    const fetchReviews = async () => {
+      const { data, error } = await supabase
+        .from("ulasan_umkm")
+        .select("*")
+        .eq("umkm_id", umkmId)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        console.error("Gagal ambil ulasan:", error)
+      } else {
+        setReviews(data || [])
+      }
     }
 
-    loadReviews()
+    fetchReviews()
   }, [umkmId])
 
-  // Save review to localStorage
-  const saveReview = (review: Review) => {
-    if (typeof window === "undefined") return
-    const data = localStorage.getItem("umkm-reviews")
-    const allReviews: Review[] = data ? JSON.parse(data) : []
-    const updatedReviews = [...allReviews, review]
-    localStorage.setItem("umkm-reviews", JSON.stringify(updatedReviews))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (formData.rating === 0) {
-      alert("Silakan berikan rating terlebih dahulu")
+      alert("Silakan beri rating terlebih dahulu")
       return
     }
 
-    const newReview: Review = {
-      id: `review_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      umkmId,
-      nama: formData.nama,
-      rating: formData.rating,
-      komentar: formData.komentar,
-      tanggal: new Date().toISOString(),
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { data, error } = await supabase.from("ulasan_umkm").insert([
+      {
+        umkm_id: Number(umkmId), // harus number
+        user_id: user?.id || null,
+        rating: formData.rating,
+        komentar: formData.komentar,
+      },
+    ]).select("*")
+
+    if (error) {
+      console.error("Gagal menambah ulasan:", error)
+      alert("❌ Gagal menambah ulasan: " + error.message)
+    } else {
+      setReviews((prev) => [ ...(data || []), ...prev ])
+      setFormData({ rating: 0, komentar: "" })
+      setShowForm(false)
+      setSubmitSuccess(true)
+      setTimeout(() => setSubmitSuccess(false), 3000)
     }
-
-    saveReview(newReview)
-    setReviews((prev) => [newReview, ...prev])
-    setFormData({ nama: "", rating: 0, komentar: "" })
-    setShowForm(false)
-    setSubmitSuccess(true)
-
-    setTimeout(() => setSubmitSuccess(false), 3000)
   }
 
   const renderStars = (rating: number, interactive = false, onRatingChange?: (rating: number) => void) => {
@@ -159,17 +164,6 @@ export function ReviewSystem({ umkmId, umkmName }: ReviewSystemProps) {
             <CardContent className="p-4">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="nama">Nama Anda</Label>
-                  <Input
-                    id="nama"
-                    value={formData.nama}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, nama: e.target.value }))}
-                    placeholder="Masukkan nama Anda"
-                    required
-                  />
-                </div>
-
-                <div>
                   <Label>Rating</Label>
                   <div className="mt-2">
                     {renderStars(formData.rating, true, (rating) => setFormData((prev) => ({ ...prev, rating })))}
@@ -221,11 +215,13 @@ export function ReviewSystem({ umkmId, umkmName }: ReviewSystemProps) {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <h4 className="font-semibold text-gray-900">{review.nama}</h4>
+                          <h4 className="font-semibold text-gray-900">
+                            {review.profiles?.full_name || "Anonim"}
+                          </h4>
                           <div className="flex items-center gap-2">
                             {renderStars(review.rating)}
                             <span className="text-sm text-gray-500">
-                              {new Date(review.tanggal).toLocaleDateString("id-ID", {
+                              {new Date(review.created_at).toLocaleDateString("id-ID", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
