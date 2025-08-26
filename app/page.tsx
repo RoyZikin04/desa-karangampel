@@ -126,7 +126,7 @@ export default function HomePage() {
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900">2,500</h3>
+              <h3 className="text-3xl font-bold text-gray-900">6,150</h3>
               <p className="text-gray-600">Jumlah Penduduk</p>
             </div>
             <div className="text-center">
