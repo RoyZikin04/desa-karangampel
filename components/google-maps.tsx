@@ -63,7 +63,7 @@ export function GoogleMaps({ address, businessName, className = "" }: GoogleMaps
           </div>
 
           <p className="text-sm text-gray-600">{address}</p>
-
+{/* 
           <div className="bg-blue-50 p-3 rounded-lg">
             <p className="text-xs text-blue-700">
               💡 <strong>Cara Mengaktifkan Peta:</strong>
@@ -74,7 +74,7 @@ export function GoogleMaps({ address, businessName, className = "" }: GoogleMaps
               <br />
               3. Uncomment kode iframe di atas
             </p>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>
