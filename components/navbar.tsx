@@ -113,7 +113,7 @@ export default function Navbar() {
               </Link>
                {/* CATATAN: Menu baru untuk pendaftaran UMKM dan admin */}
               <Link
-                href="https://pengaduan-desa-karangampel.vercel.app-umkm"
+                href="https://pengaduan-desa-karangampel.vercel.app"
                 className="text-gray-700 hover:text-blue-600 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
