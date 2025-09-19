@@ -111,7 +111,7 @@ export default function TentangDesaPage() {
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-3xl font-bold">2,500</CardTitle>
+                <CardTitle className="text-3xl font-bold">6,150</CardTitle>
                 <CardDescription>Total Penduduk</CardDescription>
               </CardHeader>
             </Card>
@@ -121,7 +121,7 @@ export default function TentangDesaPage() {
                 <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="h-8 w-8 text-green-600" />
                 </div>
-                <CardTitle className="text-3xl font-bold">650</CardTitle>
+                <CardTitle className="text-3xl font-bold">1.978</CardTitle>
                 <CardDescription>Kepala Keluarga</CardDescription>
               </CardHeader>
             </Card>
@@ -131,7 +131,7 @@ export default function TentangDesaPage() {
                 <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <MapPin className="h-8 w-8 text-yellow-600" />
                 </div>
-                <CardTitle className="text-3xl font-bold">15</CardTitle>
+                <CardTitle className="text-3xl font-bold">3</CardTitle>
                 <CardDescription>Dusun</CardDescription>
               </CardHeader>
             </Card>
