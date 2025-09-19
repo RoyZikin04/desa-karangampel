@@ -141,7 +141,7 @@ export default function TentangDesaPage() {
                 <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Award className="h-8 w-8 text-purple-600" />
                 </div>
-                <CardTitle className="text-3xl font-bold">45</CardTitle>
+                <CardTitle className="text-3xl font-bold">4</CardTitle>
                 <CardDescription>UMKM Aktif</CardDescription>
               </CardHeader>
             </Card>
