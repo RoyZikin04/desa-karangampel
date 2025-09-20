@@ -51,7 +51,7 @@ Tanggal: ${new Date().toLocaleDateString("id-ID", {
       })}
       `.trim()
 
-      const adminEmail = "admin@desamakmur.id" // Admin can redirect this to their preferred email
+      const adminEmail = "karpelsehati18@gmail.com" // Admin can redirect this to their preferred email
       const mailtoLink = `mailto:${adminEmail}?subject=${encodeURIComponent(`[Website Desa] ${formData.subjek}`)}&body=${encodeURIComponent(emailBody)}`
 
       // Open email client
@@ -227,11 +227,10 @@ Tanggal: ${new Date().toLocaleDateString("id-ID", {
                         <h3 className="font-semibold text-lg mb-2">Telepon</h3>
                         {/* CATATAN: Ganti dengan nomor telepon desa Anda */}
                         <p className="text-gray-600">
-                          Kantor Desa: (0274) 1234-5678
                           <br />
-                          Kepala Desa: 0812-3456-7890
+                          Kliwon Desa: (+62) 813-2202-7798
                           <br />
-                          Sekretaris: 0813-4567-8901
+                          Sekretaris: (+62) 895-3700-32584
                         </p>
                       </div>
                     </div>
@@ -248,17 +247,17 @@ Tanggal: ${new Date().toLocaleDateString("id-ID", {
                       <div>
                         <h3 className="font-semibold text-lg mb-2">Email</h3>
                         <p className="text-gray-600">
-                          admin@desamakmur.id (Email utama untuk formulir)
-                          <br />
+                          karpelsehati18@gmail.com
+                          {/* <br />
                           info@desamakmur.id
                           <br />
                           kepaladesa@desamakmur.id
                           <br />
-                          umkm@desamakmur.id
+                          umkm@desamakmur.id */}
                         </p>
-                        <p className="text-xs text-blue-600 mt-2">
+                        {/* <p className="text-xs text-blue-600 mt-2">
                           * Email admin@desamakmur.id dapat dialihkan ke email aktif admin
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   </CardContent>
@@ -275,10 +274,9 @@ Tanggal: ${new Date().toLocaleDateString("id-ID", {
                         <h3 className="font-semibold text-lg mb-2">Jam Operasional</h3>
                         {/* CATATAN: Sesuaikan dengan jam operasional kantor desa Anda */}
                         <div className="text-gray-600 space-y-1">
-                          <p>Senin - Jumat: 08:00 - 16:00 WIB</p>
-                          <p>Sabtu: 08:00 - 12:00 WIB</p>
-                          <p>Minggu: Tutup</p>
-                          <p className="text-sm text-red-600 mt-2">*Kecuali hari libur nasional</p>
+                          <p>Senin - Kamis: 08:00 - 16:00 WIB</p>
+                          <p>jum'at: 08:00 - 12:00 WIB</p>
+                          <p>Sabtu dan Minggu: Tutup</p>
                         </div>
                       </div>
                     </div>
@@ -322,23 +320,22 @@ Tanggal: ${new Date().toLocaleDateString("id-ID", {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Lokasi Kami</h2>
             <p className="text-xl text-gray-600">Temukan lokasi kantor desa dan fasilitas umum lainnya</p>
           </div>
-
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              {/* CATATAN: Ganti dengan embed Google Maps lokasi desa Anda */}
-              <div className="relative h-96 bg-gray-200 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <MapPin className="h-12 w-12 mx-auto mb-4" />
-                  <p className="text-lg font-semibold">Peta Lokasi Desa</p>
-                  <p className="text-sm">
-                    Ganti bagian ini dengan embed Google Maps
-                    <br />
-                    atau peta interaktif lokasi desa Anda
-                  </p>
+            <Card className="overflow-hidden">
+              <CardContent className="p-0">
+                {/* Embed Google Maps Lokasi Desa */}
+                <div className="relative h-96">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!3m2!1sid!2sid!4v1758343931743!5m2!1sid!2sid!6m8!1m7!1s2286AK6HAWOO7nZTkDHn-Q!2m2!1d-6.465350970985857!2d108.4474309323349!3f41.38783771046921!4f-4.278093712396085!5f0.4000000000000002"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
         </div>
       </section>
 
